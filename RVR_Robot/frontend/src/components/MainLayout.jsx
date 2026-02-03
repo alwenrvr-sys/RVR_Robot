@@ -1,20 +1,24 @@
 import React, { useState } from "react";
 import { Layout } from "antd";
-import { useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Outlet } from "react-router-dom";
+import logo from "../assets/RVR.png";
 import {
   ControlOutlined,
   RobotOutlined,
   NodeIndexOutlined,
   AppstoreOutlined,
   DashboardOutlined,
+  CameraOutlined,
+  UserOutlined,
+  LogoutOutlined,
 } from "@ant-design/icons";
 
 const { Header, Content } = Layout;
 
 export default function MainLayout() {
   const navigate = useNavigate();
-
+  const [profileOpen, setProfileOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -36,12 +40,47 @@ export default function MainLayout() {
         }}
       >
         {/* Left */}
-        <div style={{ color: "#fff", fontSize: 18, fontWeight: 600 }}>
-          Robot UI
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            color: "#fff",
+            fontSize: 18,
+            fontWeight: 600,
+          }}
+        >
+          <img
+            src={logo}
+            alt="RVR Logo"
+            style={{
+              height: 45,
+              width: "auto",
+              paddingLeft: 8,
+            }}
+          />
+          <span>Vision and Robot</span>
         </div>
 
-        {/* Center Icon Menu */}
-        {/* Center Icon Menu */}
+        {/* Right Status */}
+        {/* STATUS LINE (BEHIND CENTER MENU) */}
+        <div />
+        <div
+          style={{
+            position: "absolute",
+            top: 14,
+            left: "50%",
+            transform: "translateX(-50%)",
+            display: "flex",
+            justifyContent: "center",
+            gap: 160,
+            pointerEvents: "auto",
+            zIndex: 1000,
+          }}
+        >
+          <IconStatus icon={<RobotOutlined />} connected={false} />
+          <IconStatus icon={<CameraOutlined />} connected />
+        </div>
         {/* Center Icon Menu */}
         <div
           onMouseEnter={() => setMenuOpen(true)}
@@ -73,8 +112,72 @@ export default function MainLayout() {
           <AppstoreOutlined style={{ fontSize: 18, color: "#001529" }} />
         </div>
 
-        {/* Right placeholder */}
-        <div style={{ width: 80 }} />
+        {/* ================= USER PROFILE ================= */}
+        <div
+          style={{ position: "relative", }}
+          onMouseLeave={() => setProfileOpen(false)}
+        >
+          <div
+            onClick={() => setProfileOpen(!profileOpen)}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              cursor: "pointer",
+              color: "#fff",
+              padding: "6px 10px",
+              paddingRight:25,
+              borderRadius: 8,
+            }}
+          >
+            <UserOutlined style={{ fontSize: 18 }} />
+            <span style={{ fontSize: 14 }}>Admin</span>
+          </div>
+
+          {/* ---------- DROPDOWN ---------- */}
+          {profileOpen && (
+            <div
+              style={{
+                position: "absolute",
+                right: 0,
+                top: 42,
+                minWidth: 180,
+                background: "#fff",
+                borderRadius: 10,
+                boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
+                padding: 8,
+                zIndex: 2000,
+              }}
+            >
+              <ProfileItem label="Robot IP" value="192.168.1.10" />
+              <ProfileItem label="Camera IP" value="192.168.1.20" />
+
+              <div
+                style={{
+                  height: 1,
+                  background: "#eee",
+                  margin: "6px 0",
+                }}
+              />
+
+              <div
+                onClick={() => console.log("Logout")}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  padding: "8px 10px",
+                  borderRadius: 6,
+                  cursor: "pointer",
+                  color: "#ff4d4f",
+                }}
+              >
+                <LogoutOutlined />
+                Logout
+              </div>
+            </div>
+          )}
+        </div>
       </Header>
 
       {/* ================= MENU DRAWER (UNDER TOP BAR) ================= */}
@@ -164,6 +267,70 @@ function DrawerItem({ icon, label, active, onClick }) {
     >
       {icon}
       {label}
+    </div>
+  );
+}
+function IconStatus({ icon, connected }) {
+  const [hover, setHover] = useState(false);
+
+  return (
+    <div
+      style={{ position: "relative" }}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+    >
+      <div
+        style={{
+          width: 30,
+          height: 30,
+          borderRadius: "50%",
+          background: "#020202",
+          border: `2px solid ${connected ? "#52c41a" : "#ff4d4f"}`,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: connected ? "#52c41a" : "#ff4d4f",
+          fontSize: 14,
+        }}
+      >
+        {icon}
+      </div>
+
+      {hover && (
+        <div
+          style={{
+            position: "absolute",
+            top: 36,
+            left: "50%",
+            transform: "translateX(-50%)",
+            background: "#000",
+            color: "#fff",
+            padding: "4px 8px",
+            fontSize: 11,
+            borderRadius: 4,
+            whiteSpace: "nowrap",
+            pointerEvents: "none",
+          }}
+        >
+          {connected ? "Connected" : "Disconnected"}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ProfileItem({ label, value }) {
+  return (
+    <div
+      style={{
+        padding: "6px 10px",
+        borderRadius: 6,
+        fontSize: 13,
+        color: "#333",
+      }}
+    >
+      <div style={{ fontSize: 11, color: "#888" }}>{label}</div>
+      <div style={{ fontWeight: 500 }}>{value}</div>
     </div>
   );
 }

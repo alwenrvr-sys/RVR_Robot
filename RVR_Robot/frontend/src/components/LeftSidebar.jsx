@@ -3,7 +3,6 @@ import { Button, InputNumber, Switch, Divider } from "antd";
 export default function LeftSidebar() {
   return (
     <aside className="sidebar left antd-sidebar">
-
       {/* ================= ACTIONS ================= */}
       <h4 className="section-title">Actions</h4>
 
@@ -54,6 +53,18 @@ export default function LeftSidebar() {
         <InputNumber size="small" step={0.1} defaultValue={11.0} />
       </Field>
 
+      <h4 className="section-title">Presets</h4>
+
+      <Button block>HOME-1</Button>
+      <Button block>HOME-2</Button>
+      <Button block>Focus-1</Button>
+      <Button block>Focus-2</Button>
+
+      <Button block type="dashed" style={{ marginTop: 8 }}>
+        + Add Preset
+      </Button>
+
+      <Divider />
     </aside>
   );
 }

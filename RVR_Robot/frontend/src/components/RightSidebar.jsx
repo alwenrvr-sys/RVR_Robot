@@ -24,6 +24,36 @@ export default function RightSidebar() {
 
       <Divider />
 
+      {/* ================= MOTION CONTROL ================= */}
+      <h4 className="section-title">Motion Control</h4>
+
+      <div className="robot-field">
+        <label>Overall Speed (%)</label>
+        <InputNumber size="small" min={1} max={100} defaultValue={50} />
+      </div>
+
+      <div className="robot-field">
+        <label>Joint Velocity (%)</label>
+        <InputNumber size="small" min={1} max={100} defaultValue={50} />
+      </div>
+
+      <div className="robot-field">
+        <label>Joint Acceleration (%)</label>
+        <InputNumber size="small" min={1} max={100} defaultValue={50} />
+      </div>
+
+      <div className="robot-field">
+        <label>TCP Velocity (mm/s)</label>
+        <InputNumber size="small" min={1} defaultValue={200} />
+      </div>
+
+      <div className="robot-field">
+        <label>TCP Acceleration (mm/s²)</label>
+        <InputNumber size="small" min={1} defaultValue={500} />
+      </div>
+
+      <Divider />
+
       {/* ================= OPTIONS ================= */}
       <h4 className="section-title">Options</h4>
 
@@ -35,16 +65,6 @@ export default function RightSidebar() {
         <label>Z lift (mm)</label>
         <InputNumber size="small" defaultValue={80.0} />
       </div>
-
-      <Divider />
-
-      {/* ================= PRESETS ================= */}
-      <h4 className="section-title">Presets</h4>
-
-      <Button block>HOME-1</Button>
-      <Button block>HOME-2</Button>
-      <Button block>Focus-1</Button>
-      <Button block>Focus-2</Button>
 
       <Divider />
 
