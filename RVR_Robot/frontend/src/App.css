@@ -192,6 +192,39 @@ body,
   margin: 10px 0;
 }
 /* =========================================================
+   TOP CENTER MENU ANIMATION
+   ========================================================= */
+
+.top-menu {
+  position: fixed;
+  top: 56px;
+  left: 50%;
+  transform: translate(-50%, -12px);
+  opacity: 0;
+  pointer-events: none;
+
+  transition:
+    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.18s ease;
+
+  will-change: transform, opacity;
+}
+
+.top-menu.open {
+  transform: translate(-50%, 0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.menu-icon {
+  transition: transform 0.25s ease;
+}
+
+.menu-icon.open {
+  transform: rotate(90deg);
+}
+
+/* =========================================================
    ML TRAIN – FULLY SCOPED & POLISHED
    ========================================================= */
 

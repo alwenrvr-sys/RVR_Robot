@@ -88,33 +88,33 @@ export default function MainLayout() {
           style={{
             position: "absolute",
             left: "50%",
-            top: 20, // inside navbar
+            top: 25,
             transform: "translateX(-50%)",
             cursor: "pointer",
 
-            /* inverted half-oval */
             width: 72,
             height: 36,
             background: "#f5f5f5",
             borderTopLeftRadius: 36,
             borderTopRightRadius: 36,
-            borderBottomLeftRadius: 0,
-            borderBottomRightRadius: 0,
 
             display: "flex",
             alignItems: "flex-end",
             justifyContent: "center",
             paddingBottom: 6,
 
-            zIndex: 1001,
+            zIndex: 2001, 
           }}
         >
-          <AppstoreOutlined style={{ fontSize: 18, color: "#001529" }} />
+          <AppstoreOutlined
+            className={`menu-icon ${menuOpen ? "open" : ""}`}
+            style={{ fontSize: 24, color: "#000000" }}
+          />
         </div>
 
         {/* ================= USER PROFILE ================= */}
         <div
-          style={{ position: "relative", }}
+          style={{ position: "relative" }}
           onMouseLeave={() => setProfileOpen(false)}
         >
           <div
@@ -126,7 +126,7 @@ export default function MainLayout() {
               cursor: "pointer",
               color: "#fff",
               padding: "6px 10px",
-              paddingRight:25,
+              paddingRight: 25,
               borderRadius: 8,
             }}
           >
