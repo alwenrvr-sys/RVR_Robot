@@ -10,6 +10,10 @@ import {
   Legend,
 } from "chart.js";
 import { Line, Bar } from "react-chartjs-2";
+import { useDispatch, useSelector } from 'react-redux';
+import { useEffect } from "react";
+import { getUser } from '../appRedux/actions/Auth';
+
 
 ChartJS.register(
   CategoryScale,
@@ -23,6 +27,13 @@ ChartJS.register(
 
 export default function Dashboard() {
   /* ================= DUMMY DATA ================= */
+  const dispatch = useDispatch();
+
+
+  useEffect(() => {
+    dispatch(getUser());
+    console.log("Dispatched getUser action");
+    }, []);
 
   const pickRateData = {
     labels: ["10:00", "10:05", "10:10", "10:15", "10:20", "10:25"],
