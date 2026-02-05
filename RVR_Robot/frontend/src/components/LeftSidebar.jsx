@@ -2,12 +2,16 @@ import { Button, InputNumber, Switch, Divider } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import { triggerCamera } from "../appRedux/actions/Camera";
 import { stopRobot } from "../appRedux/actions/Robot";
+import RightFanMenu from "./RightFanMenu";
 
 export default function LeftSidebar() {
   const dispatch = useDispatch();
-  const { loading, result, error } = useSelector((state) => state.camera);
+  const { loading, result,} = useSelector((state) => state.camera);
   const { pose } = useSelector((state) => state.robot);
   const { connected } = useSelector((state) => state.robot);
+
+  const scaleX = result?.scale_x_px_per_mm;
+  const scaleY = result?.scale_y_px_per_mm;
 
   const handleTriggerCamera = () => {
     if (!pose?.z) {
@@ -30,9 +34,18 @@ export default function LeftSidebar() {
       <Button block>Analyze</Button>
       <Button block>OCR</Button>
 
-      <Button type="primary" block>
-        Pick & Place
-      </Button>
+      {/* ===== PICK & PLACE + APP SELECTOR ===== */}
+      <div className="pick-app-row">
+        <Button type="primary" block>
+          Pick & Place
+        </Button>
+
+        <RightFanMenu
+          onSelect={(mode) => {
+            console.log("Selected:", mode);
+          }}
+        />
+      </div>
 
       <Button
         danger
@@ -70,11 +83,11 @@ export default function LeftSidebar() {
       <h4 className="section-title">Calibration</h4>
 
       <Field label="Scale X (px/mm)">
-        <InputNumber size="small" step={0.1} defaultValue={11.0} />
+        <InputNumber size="small" step={0.1}   precision={3} value={scaleX}  />
       </Field>
 
       <Field label="Scale Y (px/mm)">
-        <InputNumber size="small" step={0.1} defaultValue={11.0} />
+        <InputNumber size="small" step={0.1}   precision={3}value={scaleY}  />
       </Field>
 
       <h4 className="section-title">Presets</h4>

@@ -9,9 +9,16 @@ from app.robot.Camera_service import trigger_camera
 router = APIRouter(prefix="/camera", tags=["Camera"])
 
 
-@router.post("/trigger", response_model=CameraTriggerResponse)
-async def trigger_camera_api(payload: CameraTriggerRequest):
-    try:
-        return await trigger_camera(payload.current_z)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+@router.post(
+    "/trigger",
+    response_model=CameraTriggerResponse
+)
+async def trigger_camera_api(req: CameraTriggerRequest):
+    result = await trigger_camera(req.current_z)
+
+    return {
+        "status": "ok",
+        "message": "Camera triggered",
+        **result
+    }
+

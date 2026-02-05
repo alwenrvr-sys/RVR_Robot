@@ -1,6 +1,5 @@
 from pydantic import BaseModel
-from typing import List
-from typing import Optional
+from typing import List, Optional, Tuple, Dict, Any
 
 class ItemCreate(BaseModel):
     name: str
@@ -32,11 +31,14 @@ class UserUsernameResponse(BaseModel):
 class CameraTriggerRequest(BaseModel):
     current_z: float
 
-
 class CameraTriggerResponse(BaseModel):
     status: str
     message: str
     z: float
+    scale_x_px_per_mm: float
+    scale_y_px_per_mm: float
+    image_base64: str
+
 
 class TcpPose(BaseModel):
     x: float
@@ -63,3 +65,27 @@ class MotionParams(BaseModel):
 
 class MoveLRequest(BaseModel):
     pose: List[float]  # [x, y, z, rx, ry, rz]
+
+
+class AnalyzeImageRequest(BaseModel):
+    image_base64: str              # frontend sends base64 image
+    tcp: List[float]               # [x,y,z,rx,ry,rz]
+
+    white_thresh: int = 150
+    auto_thresh: bool = True
+    enable_edges: bool = False
+    enable_ocr: bool = False
+    ocr_roi: Optional[Tuple[int, int, int, int]] = None
+
+class AnalyzeImageResponse(BaseModel):
+    success: bool
+
+    center_px: Optional[Tuple[float, float]] = None
+    distance_mm: Optional[float] = None
+    theta_rect: Optional[float] = None
+    theta_pca: Optional[float] = None
+    target: Optional[Dict[str, float]] = None
+    inspection: Optional[Dict[str, Any]] = None
+    ocr: Optional[str] = None
+
+    reason: Optional[str] = None

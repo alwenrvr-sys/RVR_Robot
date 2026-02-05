@@ -1,4 +1,4 @@
-import { call, put, takeEvery, delay } from "redux-saga/effects";
+import { call, put, takeEvery,} from "redux-saga/effects";
 import {
   CAMERA_TRIGGER,
   CAMERA_TRIGGER_SUCCESS,

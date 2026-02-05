@@ -105,8 +105,9 @@ body,
 }
 
 
-.sidebar.left {
-  border-right: 1px solid #e5e5e5;
+.sidebar.left ,
+.pick-app-row {
+  overflow: visible !important;
 }
 
 .sidebar.right {
@@ -664,3 +665,116 @@ body,
   border-color: #ff4d4f;
   color: #ff4d4f;
 }
+
+/* Reserve horizontal space so items don't overlap STOP */
+.fan-slot {
+  position: relative;
+  width: 170px;          /* slightly smaller */
+  height: 60px;
+  margin: 8px 0;
+}
+
+/* Core menu */
+.fan-menu {
+  position: relative;
+  width: 50px;
+  height: 50px;
+}
+
+/* Main button */
+.fan-main {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #1677ff;   /* ANT BLUE */
+  color: white;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  z-index: 3;
+  box-shadow: 0 0 0 6px #f5f5f5;
+}
+
+/* Fan items */
+.fan-item {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #1677ff;   /* ANT BLUE */
+  color: white;
+  border: none;
+  font-size: 11px;
+  white-space: nowrap;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.35s ease, opacity 0.2s ease;
+  z-index: 2;
+}
+
+.fan-menu.open .fan-item {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Right-side circular arc
+   - smaller radius (closer to App)
+   - larger angles (more spacing between items)
+*/
+
+.fan-menu.open .item-0 {
+  transform: translate(-50%, -50%)
+             rotate(-45deg)
+             translateX(70px)
+             rotate(45deg);
+}
+
+.fan-menu.open .item-1 {
+  transform: translate(-50%, -50%)
+             rotate(0deg)
+             translateX(85px)
+             rotate(0deg);
+}
+
+.fan-menu.open .item-2 {
+  transform: translate(-50%, -50%)
+             rotate(45deg)
+             translateX(70px)
+             rotate(-45deg);
+}
+
+/* Hover feedback */
+.fan-main:hover,
+.fan-item:hover {
+  background: #4096ff;   /* lighter blue on hover */
+}
+
+/* ================= PICK + APP ROW ================= */
+
+.pick-app-row {
+  position: relative;
+  width: 100%;
+  margin: 8px 0;
+}
+
+/* Override fan-slot for edge placement */
+.pick-app-row .fan-slot {
+  position: absolute;
+  top: 50%;
+  right: -25px;              /* pushes half outside sidebar */
+  transform: translateY(-50%);
+  width: auto;
+  height: auto;
+  margin: 0;
+}
+
+/* Keep fan-menu compact */
+.pick-app-row .fan-menu {
+  width: 50px;
+  height: 50px;
+}
+
+

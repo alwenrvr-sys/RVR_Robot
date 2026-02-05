@@ -2,6 +2,7 @@ import React from "react";
 import "../App.css";
 import RightSidebar from "./RightSidebar";
 import LeftSidebar from "./LeftSidebar";
+import Imagepreview from "./Imagepreview";
 
 export default function Joystick() {
   return (
@@ -14,7 +15,7 @@ export default function Joystick() {
         <div className="center-upper">
           <div className="upper-left">
             {/* Image / Camera Preview */}
-            <div className="panel">Camera Preview</div>
+            <div className="panel"><Imagepreview /></div>
           </div>
 
           <div className="upper-right">
