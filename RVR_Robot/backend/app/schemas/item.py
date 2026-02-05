@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from typing import List
+from typing import Optional
 
 class ItemCreate(BaseModel):
     name: str
@@ -54,3 +55,11 @@ class EnableRequest(BaseModel):
 class RobotInstallAngle(BaseModel):
     yangle: float
     zangle: float
+
+class MotionParams(BaseModel):
+    vel: Optional[float]
+    acc: Optional[float]
+    ovl: Optional[float]
+
+class MoveLRequest(BaseModel):
+    pose: List[float]  # [x, y, z, rx, ry, rz]

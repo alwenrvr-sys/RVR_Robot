@@ -3,6 +3,10 @@ from app.sdk.fairino.Robot import RPC
 
 ROBOT_IP = "192.168.58.2"
 
+MOVE_VEL = 50   
+MOVE_ACC = 10    
+OVL = 100.0       
+
 class RobotService:
     def __init__(self):
         self.robot = RPC(ROBOT_IP)
@@ -79,9 +83,62 @@ class RobotService:
         return self.call("GetRobotInstallAngle")
 
 #-------------MOVEMENTS------------
+    def move_l(self, pose):
+        pose = list(map(float, pose))
+
+        return self.call(
+            "MoveL",
+            pose,                      # desc_pos
+            0,                      # tool
+            0,                      # user
+            [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],  # joint_pos → let SDK solve IK
+            MOVE_VEL,                  # vel (%)
+            MOVE_ACC,                  # acc (%)
+            OVL,                       # ovl (%)
+            -1,                # blendR (-1 = stop)
+            0,                         # blendMode
+            [0.0, 0.0, 0.0, 0.0],      # exaxis_pos
+            0,                         # search
+            0,                         # offset_flag
+            [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],  # offset_pos
+            -1,                        # config
+            0,                         # velAccParamMode (percentage)
+            0,                         # overSpeedStrategy
+            10                         # speedPercent
+        )
 
 
 #-------------SPEED----------------
+    @staticmethod
+    def get_motion_params():
+        return {
+            "vel": MOVE_VEL,
+            "acc": MOVE_ACC,
+            "ovl": OVL,
+        }
+
+    @staticmethod
+    def set_motion_params(vel=None, acc=None, ovl=None):
+        global MOVE_VEL, MOVE_ACC, OVL
+
+        if vel is not None:
+            vel = float(vel)
+            if not (0 <= vel <= 100):
+                raise ValueError("vel must be 0~100")
+            MOVE_VEL = vel
+
+        if acc is not None:
+            acc = float(acc)
+            if not (0 <= acc <= 100):
+                raise ValueError("acc must be 0~100")
+            MOVE_ACC = acc
+
+        if ovl is not None:
+            ovl = float(ovl)
+            if not (0 <= ovl <= 100):
+                raise ValueError("ovl must be 0~100")
+            OVL = ovl
+
     def get_tcp_speed(self):
         return 0, [
             self.robot.robot_state_pkg.actual_TCP_Speed[0],

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from app.robot.Robot_service import RobotService
-from app.schemas.item import TcpPose,RobotInstallAngle
+from app.schemas.item import TcpPose,RobotInstallAngle,MotionParams,MoveLRequest
 
 router = APIRouter(prefix="/robot", tags=["Robot"])
 
@@ -119,6 +119,41 @@ def get_tcp_speed():
             "vry": speed[4],
             "vrz": speed[5],
         }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/motion-params")
+def get_params():
+    return RobotService.get_motion_params()
+
+@router.post("/motion-params")
+def set_params(params: MotionParams):
+    RobotService.set_motion_params(
+        vel=params.vel,
+        acc=params.acc,
+        ovl=params.ovl,
+    )
+    return {
+        "status": "ok",
+        "params": RobotService.get_motion_params()
+    }
+#--------------MOVEMENT----------------
+@router.post("/moveL")
+def move_l(req: MoveLRequest):
+    try:
+        if len(req.pose) != 6:
+            raise ValueError("pose must have 6 values [x,y,z,rx,ry,rz]")
+
+        error = robot.move_l(req.pose)
+        if error != 0:
+            raise RuntimeError(f"MoveL failed with error code: {error}")
+
+        return {
+            "status": "ok",
+            "motion": "MoveL",
+            "pose": req.pose
+        }
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

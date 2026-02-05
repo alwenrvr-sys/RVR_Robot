@@ -1,26 +1,99 @@
 import { Button, InputNumber, Checkbox, Divider } from "antd";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  getTcp,
+  setAutoMode,
+  setManualMode,
+  enableRobot,
+  disableRobot,
+  stopRobot,
+  resetRobotErrors,
+  moveL,
+} from "../appRedux/actions/Robot";
+import { useEffect, useState } from "react";
 
 export default function RightSidebar() {
+  const dispatch = useDispatch();
+  const { moving, enabled, connected, mode, pose } = useSelector(
+    (state) => state.robot,
+  );
+  const isDisabledState = enabled !== 1;
+  const [tcp, setTcp] = useState({
+    x: null,
+    y: null,
+    z: null,
+    rx: null,
+    ry: null,
+    rz: null,
+  });
+
+  useEffect(() => {
+    if (pose) {
+      setTcp({
+        x: pose.x,
+        y: pose.y,
+        z: pose.z,
+        rx: pose.rx,
+        ry: pose.ry,
+        rz: pose.rz,
+      });
+    }
+  }, [pose]);
+  const updateField = (key, value) => {
+    setTcp((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleMoveL = () => {
+    const pose = [tcp.x, tcp.y, tcp.z, tcp.rx, tcp.ry, tcp.rz];
+    dispatch(moveL(pose));
+  };
+
   return (
     <aside className="sidebar right antd-sidebar">
-
       {/* ================= TARGET TCP ================= */}
       <h4 className="section-title">Target TCP</h4>
 
-      {["X", "Y", "Z", "Rx", "Ry", "Rz"].map(k => (
-        <div className="robot-field" key={k}>
-          <label>{k}</label>
-          <InputNumber size="small" />
-        </div>
-      ))}
+      <div className="tcp-grid">
+        {[
+          ["x", "X"],
+          ["y", "Y"],
+          ["z", "Z"],
+          ["rx", "Rx"],
+          ["ry", "Ry"],
+          ["rz", "Rz"],
+        ].map(([key, label]) => (
+          <div className="tcp-row" key={key}>
+            <label className="tcp-label">{label}</label>
+            <InputNumber
+              size="small"
+              value={tcp[key]}
+              precision={2}
+              step={0.01}
+              onChange={(v) => updateField(key, v)}
+              className="tcp-input"
+            />
+          </div>
+        ))}
+      </div>
+      <div className="btn-row">
+        <Button
+          type="primary"
+          block
+          loading={moving}
+          disabled={!connected || isDisabledState}
+          onClick={handleMoveL}
+        >
+          MOVE (LINEAR)
+        </Button>
 
-      <Button type="primary" block>
-        MOVE (PTP)
-      </Button>
-
-      <Button block>
-        GET
-      </Button>
+        <Button
+          block
+          disabled={!connected || isDisabledState}
+          onClick={() => dispatch(getTcp())}
+        >
+          GET
+        </Button>
+      </div>
 
       <Divider />
 
@@ -72,24 +145,64 @@ export default function RightSidebar() {
       <h4 className="section-title">Control</h4>
 
       <div className="btn-row">
-        <Button danger block>STOP</Button>
-        <Button block>CLEAR ERR</Button>
+        <Button
+          danger
+          block
+          disabled={!connected || isDisabledState}
+          onClick={() => dispatch(stopRobot())}
+        >
+          STOP
+        </Button>
+
+        <Button
+          block
+          disabled={!connected || isDisabledState}
+          onClick={() => dispatch(resetRobotErrors())}
+        >
+          CLEAR ERR
+        </Button>
       </div>
 
       <div className="btn-row">
-        <Button type="primary" block>ENABLE</Button>
-        <Button block>DISABLE</Button>
+        <Button
+          type={enabled === 1 ? "primary" : "default"}
+          block
+          onClick={() => dispatch(enableRobot())}
+        >
+          ENABLE
+        </Button>
+        <Button
+          danger={enabled === 0}
+          block
+          onClick={() => dispatch(disableRobot())}
+        >
+          DISABLE
+        </Button>
       </div>
 
       <div className="btn-row">
-        <Button block>AUTO MODE</Button>
-        <Button block>MANUAL (DRAG)</Button>
+        <Button
+          block
+          type={mode === 0 ? "primary" : "default"}
+          disabled={!connected || isDisabledState}
+          onClick={() => dispatch(setAutoMode())}
+        >
+          AUTO
+        </Button>
+
+        <Button
+          block
+          type={mode === 1 ? "primary" : "default"}
+          disabled={!connected || isDisabledState}
+          onClick={() => dispatch(setManualMode())}
+        >
+          MANUAL
+        </Button>
       </div>
 
-      <Button block>
+      <Button block disabled={!connected || isDisabledState}>
         PICK / RELEASE
       </Button>
-
     </aside>
   );
 }

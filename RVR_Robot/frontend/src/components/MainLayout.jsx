@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import { Layout } from "antd";
 import { useNavigate } from "react-router-dom";
 import { Outlet } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
+import { useRef } from "react";
 import logo from "../assets/RVR.png";
 import {
   ControlOutlined,
@@ -13,13 +16,32 @@ import {
   UserOutlined,
   LogoutOutlined,
 } from "@ant-design/icons";
+import { RobotPing, enableRobot, setAutoMode } from "../appRedux/actions/Robot";
 
 const { Header, Content } = Layout;
 
 export default function MainLayout() {
+  const initializedRef = useRef(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [profileOpen, setProfileOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const { connected, enabled, mode } = useSelector((state) => state.robot);
+
+  useEffect(() => {
+    dispatch(RobotPing());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (!connected) return;
+    if (initializedRef.current) return;
+
+    initializedRef.current = true;
+
+    dispatch(enableRobot());
+    dispatch(setAutoMode());
+  }, [connected, dispatch]);
 
   return (
     <Layout style={{ height: "100vh", overflow: "hidden" }}>
@@ -78,7 +100,7 @@ export default function MainLayout() {
             zIndex: 1000,
           }}
         >
-          <IconStatus icon={<RobotOutlined />} connected={false} />
+          <IconStatus icon={<RobotOutlined />} connected={connected} />
           <IconStatus icon={<CameraOutlined />} connected />
         </div>
         {/* Center Icon Menu */}
@@ -103,7 +125,7 @@ export default function MainLayout() {
             justifyContent: "center",
             paddingBottom: 6,
 
-            zIndex: 2001, 
+            zIndex: 2001,
           }}
         >
           <AppstoreOutlined

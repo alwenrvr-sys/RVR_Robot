@@ -1,13 +1,32 @@
 import { Button, InputNumber, Switch, Divider } from "antd";
+import { useDispatch, useSelector } from "react-redux";
+import { triggerCamera } from "../appRedux/actions/Camera";
+import { stopRobot } from "../appRedux/actions/Robot";
 
 export default function LeftSidebar() {
+  const dispatch = useDispatch();
+  const { loading, result, error } = useSelector((state) => state.camera);
+  const { pose } = useSelector((state) => state.robot);
+  const { connected } = useSelector((state) => state.robot);
+
+  const handleTriggerCamera = () => {
+    if (!pose?.z) {
+      console.warn("TCP Z not available");
+      return;
+    }
+
+    dispatch(triggerCamera(pose.z));
+  };
+
   return (
     <aside className="sidebar left antd-sidebar">
       {/* ================= ACTIONS ================= */}
       <h4 className="section-title">Actions</h4>
 
       <Button block>Upload Photo</Button>
-      <Button block>Trigger Camera</Button>
+      <Button block loading={loading} onClick={handleTriggerCamera}>
+        Trigger Camera
+      </Button>
       <Button block>Analyze</Button>
       <Button block>OCR</Button>
 
@@ -15,7 +34,12 @@ export default function LeftSidebar() {
         Pick & Place
       </Button>
 
-      <Button danger block>
+      <Button
+        danger
+        block
+        disabled={!connected}
+        onClick={() => dispatch(stopRobot())}
+      >
         STOP
       </Button>
 
