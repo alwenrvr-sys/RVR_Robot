@@ -4,9 +4,9 @@ import { triggerCamera } from "../appRedux/actions/Camera";
 import { stopRobot } from "../appRedux/actions/Robot";
 import RightFanMenu from "./RightFanMenu";
 
-export default function LeftSidebar() {
+export default function LeftSidebarPick({ onModeChange }) {
   const dispatch = useDispatch();
-  const { loading, result,} = useSelector((state) => state.camera);
+  const { loading, result } = useSelector((state) => state.camera);
   const { pose } = useSelector((state) => state.robot);
   const { connected } = useSelector((state) => state.robot);
 
@@ -25,7 +25,7 @@ export default function LeftSidebar() {
   return (
     <aside className="sidebar left antd-sidebar">
       {/* ================= ACTIONS ================= */}
-      <h4 className="section-title">Actions</h4>
+      <h4 className="section-title">Pick & Place</h4>
 
       <Button block>Upload Photo</Button>
       <Button block loading={loading} onClick={handleTriggerCamera}>
@@ -40,11 +40,7 @@ export default function LeftSidebar() {
           Pick & Place
         </Button>
 
-        <RightFanMenu
-          onSelect={(mode) => {
-            console.log("Selected:", mode);
-          }}
-        />
+        <RightFanMenu onSelect={onModeChange} />
       </div>
 
       <Button
@@ -83,11 +79,11 @@ export default function LeftSidebar() {
       <h4 className="section-title">Calibration</h4>
 
       <Field label="Scale X (px/mm)">
-        <InputNumber size="small" step={0.1}   precision={3} value={scaleX}  />
+        <InputNumber size="small" step={0.1} precision={3} value={scaleX} />
       </Field>
 
       <Field label="Scale Y (px/mm)">
-        <InputNumber size="small" step={0.1}   precision={3}value={scaleY}  />
+        <InputNumber size="small" step={0.1} precision={3} value={scaleY} />
       </Field>
 
       <h4 className="section-title">Presets</h4>

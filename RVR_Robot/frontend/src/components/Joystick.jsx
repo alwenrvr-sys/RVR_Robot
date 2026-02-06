@@ -1,13 +1,19 @@
 import React from "react";
 import "../App.css";
+import { useState } from "react";
 import RightSidebar from "./RightSidebar";
-import LeftSidebar from "./LeftSidebar";
+import LeftSidebarPick from "./LeftSidebarPick";
+import LeftSidebarDraw from "./LeftSidebarDraw";
+import LeftSidebarSort from "./LeftSidebarSort";
 import Imagepreview from "./Imagepreview";
 
 export default function Joystick() {
+  const [mode, setMode] = useState("pick");
   return (
     <div className="joystick-layout">
-      <LeftSidebar />
+      {mode === "pick" && <LeftSidebarPick onModeChange={setMode} />}
+      {mode === "draw" && <LeftSidebarDraw onModeChange={setMode} />}
+      {mode === "sort" && <LeftSidebarSort onModeChange={setMode} />}
 
       {/* CENTER */}
       <main className="center">
@@ -15,7 +21,9 @@ export default function Joystick() {
         <div className="center-upper">
           <div className="upper-left">
             {/* Image / Camera Preview */}
-            <div className="panel"><Imagepreview /></div>
+            <div className="panel">
+              <Imagepreview />
+            </div>
           </div>
 
           <div className="upper-right">

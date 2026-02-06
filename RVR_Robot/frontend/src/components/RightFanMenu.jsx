@@ -1,7 +1,9 @@
-import { useState } from "react";
-import {   AppstoreOutlined, } from "@ant-design/icons";
+import { useState, useRef, useEffect } from "react";
+import { AppstoreOutlined } from "@ant-design/icons";
+
 export default function RightFanMenu({ onSelect }) {
   const [open, setOpen] = useState(false);
+  const ref = useRef(null);
 
   const items = [
     { key: "pick", label: "Pick" },
@@ -9,31 +11,39 @@ export default function RightFanMenu({ onSelect }) {
     { key: "sort", label: "Sort" },
   ];
 
-  return (
-    <div className="fan-slot">
-      <div
-        className="fan-hover-zone"
-        onMouseEnter={() => setOpen(true)}
-        onMouseLeave={() => setOpen(false)}
-      >
-        <div className={`fan-menu ${open ? "open" : ""}`}>
-          <button className="fan-main" onClick={() => setOpen((v) => !v)}>
-            <  AppstoreOutlined />
-          </button>
+  // close when clicking outside
+  useEffect(() => {
+    const handler = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
-          {items.map((item, i) => (
-            <button
-              key={item.key}
-              className={`fan-item item-${i}`}
-              onClick={() => {
-                onSelect?.(item.key);
-                setOpen(false);
-              }}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
+  return (
+    <div className="fan-slot" ref={ref}>
+      <div className={`fan-menu ${open ? "open" : ""}`}>
+        <button
+          className="fan-main"
+          onClick={() => setOpen((v) => !v)}
+        >
+          <AppstoreOutlined />
+        </button>
+
+        {items.map((item, i) => (
+          <button
+            key={item.key}
+            className={`fan-item item-${i}`}
+            onClick={() => {
+              onSelect?.(item.key);
+              setOpen(false);
+            }}
+          >
+            {item.label}
+          </button>
+        ))}
       </div>
     </div>
   );
