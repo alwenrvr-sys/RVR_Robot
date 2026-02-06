@@ -1,6 +1,6 @@
 import { Button, InputNumber, Switch, Divider } from "antd";
 import { useDispatch, useSelector } from "react-redux";
-import { triggerCamera } from "../appRedux/actions/Camera";
+import { triggerCamera, analyzeImage ,uploadLocalImage} from "../appRedux/actions/Camera";
 import { stopRobot } from "../appRedux/actions/Robot";
 import RightFanMenu from "./RightFanMenu";
 
@@ -18,8 +18,52 @@ export default function LeftSidebarPick({ onModeChange }) {
       console.warn("TCP Z not available");
       return;
     }
-
     dispatch(triggerCamera(pose.z));
+  };
+  const imageBase64 = result?.image_base64;
+
+  const handleAnalyze = () => {
+    if (!imageBase64) {
+      console.warn("No image captured");
+      return;
+    }
+
+    if (!pose) {
+      console.warn("TCP not available");
+      return;
+    }
+
+    dispatch(
+      analyzeImage({
+        image_base64: imageBase64,
+        tcp: [pose.x, pose.y, pose.z, pose.rx, pose.ry, pose.rz],
+        white_thresh: 150,
+        auto_thresh: true,
+        enable_edges: true,
+      }),
+    );
+  };
+
+  const handleUploadImage = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+
+    input.onchange = async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        const base64 = reader.result.split(",")[1]; // strip data:image/*
+        dispatch(uploadLocalImage(base64));
+      };
+
+      reader.readAsDataURL(file);
+    };
+
+    input.click();
   };
 
   return (
@@ -27,12 +71,16 @@ export default function LeftSidebarPick({ onModeChange }) {
       {/* ================= ACTIONS ================= */}
       <h4 className="section-title">Pick & Place</h4>
 
-      <Button block>Upload Photo</Button>
+      <Button block onClick={handleUploadImage}>
+        Upload Photo
+      </Button>
+
       <Button block loading={loading} onClick={handleTriggerCamera}>
         Trigger Camera
       </Button>
-      <Button block>Analyze</Button>
-      <Button block>OCR</Button>
+      <Button block onClick={handleAnalyze}>
+        Analyze
+      </Button>
 
       {/* ===== PICK & PLACE + APP SELECTOR ===== */}
       <div className="pick-app-row">

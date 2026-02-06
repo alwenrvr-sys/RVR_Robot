@@ -1,4 +1,7 @@
 import React, { useState } from "react";
+import Imagepreview from "./Imagepreview";
+import { useDispatch } from "react-redux";
+import { uploadLocalImage } from "../appRedux/actions/Camera";
 
 export default function MLTrain() {
   const [tab, setTab] = useState("single");
@@ -32,10 +35,32 @@ export default function MLTrain() {
 /* ================================================= */
 
 function SingleIdentify() {
+  const dispatch = useDispatch();
   const [roi, setRoi] = useState(false);
   const [outline, setOutline] = useState(false);
   const [autoUnknown, setAutoUnknown] = useState(true);
   const [fastIndex, setFastIndex] = useState(true);
+  const handleUploadImage = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+
+    input.onchange = async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        const base64 = reader.result.split(",")[1]; // strip data:image/*
+        dispatch(uploadLocalImage(base64));
+      };
+
+      reader.readAsDataURL(file);
+    };
+
+    input.click();
+  };
 
   return (
     <div className="ml-grid">
@@ -43,10 +68,15 @@ function SingleIdentify() {
       <div className="ml-panel">
         <h4 className="ml-title">Input / Crop</h4>
 
-        <div className="ml-image-preview">Image Preview</div>
+        <div className="ml-image-preview">
+          {" "}
+          <Imagepreview />
+        </div>
 
         <div className="ml-btn-group">
-          <button className="ml-btn neutral">Upload Image</button>
+          <button className="ml-btn neutral" onClick={handleUploadImage}>
+            Upload Image
+          </button>
           <button className="ml-btn neutral">Paste Image</button>
           <button className="ml-btn primary">Identify</button>
         </div>

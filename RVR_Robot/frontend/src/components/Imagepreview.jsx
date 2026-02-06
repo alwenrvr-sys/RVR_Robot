@@ -1,49 +1,22 @@
+import { useRef } from "react";
 import { useSelector } from "react-redux";
-import { Spin } from "antd";
+import ImageOverlay from "./ImageOverlay";
 
 export default function Imagepreview() {
-  const { loading, result, error } = useSelector((state) => state.camera);
+  const imgRef = useRef(null);
+  const { loading, result } = useSelector((state) => state.camera);
 
-  if (loading) {
-    return (
-      <div className="joystick-preview loading">
-        <Spin
-          tip="Capturing image..."
-          size="large"
-        />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="joystick-preview error">
-        Camera error
-      </div>
-    );
-  }
-
-  if (!result?.image_base64) {
-    return (
-      <div className="joystick-preview empty">
-        No image
-      </div>
-    );
-  }
+  if (!result?.image_base64) return <div>No image</div>;
 
   return (
-    <div className="joystick-preview">
+    <div className="joystick-preview" style={{ position: "relative" }}>
       <img
+        ref={imgRef}
         src={`data:image/jpeg;base64,${result.image_base64}`}
         alt="Camera Preview"
-        draggable={false}
-        style={{
-          width: "100%",
-          height: "100%",
-          objectFit: "contain",
-          background: "#111",
-        }}
+        style={{ width: "100%", height: "100%", objectFit: "contain" }}
       />
+      <ImageOverlay imgRef={imgRef} />
     </div>
   );
 }

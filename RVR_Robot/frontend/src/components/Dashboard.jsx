@@ -13,6 +13,7 @@ import { Line, Bar } from "react-chartjs-2";
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect } from "react";
 import { getUser } from '../appRedux/actions/Auth';
+import Imagepreview from "./Imagepreview";
 
 
 ChartJS.register(
@@ -97,7 +98,7 @@ export default function Dashboard() {
 
           <div style={resultsRow}>
             <div style={cameraBox}>
-              <div style={fakeCamera}>Camera View</div>
+              <div style={cameraWrapper}> <Imagepreview /></div>
             </div>
 
             <table style={table}>
@@ -246,17 +247,20 @@ const resultsRow = {
 
 const cameraBox = {
   flex: 1,
+  minWidth: 0,   // 👈 VERY IMPORTANT in grid/flex
 };
 
-const fakeCamera = {
-  height: 180,
+
+const cameraWrapper = {
+  position: "relative",
+  width: "100%",
+  aspectRatio: "4 / 3",     // 👈 responsive camera ratio
   background: "#eaeaea",
   borderRadius: 8,
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  color: "#777",
+  overflow: "hidden",
 };
+
+
 
 const table = {
   flex: 1,

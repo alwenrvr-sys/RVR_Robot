@@ -13,7 +13,7 @@ const triggerCamera = async (currentZ) => {
       },
       {
         withCredentials: true,
-      }
+      },
     );
 
     return response;
@@ -22,6 +22,14 @@ const triggerCamera = async (currentZ) => {
   }
 };
 
+const analyzeImage = async (payload) => {
+  return axios.post(HOST + CAMERA_API.ANALYZE, payload, {
+    headers: { "Content-Type": "application/json" },
+    timeout: 15000,
+  });
+};
+
 export const CAMERA_SERVICE = {
   CAMERA_TRIGGER: triggerCamera,
+  ANALYZE: analyzeImage,
 };

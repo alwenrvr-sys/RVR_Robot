@@ -9,6 +9,8 @@ export default function RightFanMenu({ onSelect }) {
     { key: "pick", label: "Pick" },
     { key: "draw", label: "Draw" },
     { key: "sort", label: "Sort" },
+    { key: "ocr", label: "OCR" },
+    { key: "add", label: "add" },
   ];
 
   // close when clicking outside
@@ -25,10 +27,7 @@ export default function RightFanMenu({ onSelect }) {
   return (
     <div className="fan-slot" ref={ref}>
       <div className={`fan-menu ${open ? "open" : ""}`}>
-        <button
-          className="fan-main"
-          onClick={() => setOpen((v) => !v)}
-        >
+        <button className="fan-main" onClick={() => setOpen((v) => !v)}>
           <AppstoreOutlined />
         </button>
 

@@ -2,6 +2,10 @@ import {
   CAMERA_TRIGGER,
   CAMERA_TRIGGER_SUCCESS,
   CAMERA_TRIGGER_FAILURE,
+  ANALYZE_IMAGE,
+  ANALYZE_IMAGE_SUCCESS,
+  ANALYZE_IMAGE_FAILURE,
+  CAMERA_LOCAL_IMAGE
 } from "../../constants/ActionType";
 
 export const triggerCamera = (currentZ) => ({
@@ -17,4 +21,24 @@ export const triggerCameraSuccess = (data) => ({
 export const triggerCameraFailure = (error) => ({
   type: CAMERA_TRIGGER_FAILURE,
   payload: error,
+});
+
+export const analyzeImage = (payload) => ({
+  type: ANALYZE_IMAGE,
+  payload,
+});
+
+export const analyzeImageSuccess = (data) => ({
+  type: ANALYZE_IMAGE_SUCCESS,
+  payload: data,
+});
+
+export const analyzeImageFailure = (error) => ({
+  type: ANALYZE_IMAGE_FAILURE,
+  payload: error,
+});
+
+export const uploadLocalImage = (base64) => ({
+  type: "CAMERA_LOCAL_IMAGE",
+  payload: base64,
 });

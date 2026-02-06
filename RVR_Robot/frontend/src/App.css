@@ -672,6 +672,7 @@ body,
   width: 170px;          /* slightly smaller */
   height: 60px;
   margin: 8px 0;
+  z-index: 20;
 }
 
 /* Core menu */
@@ -693,6 +694,7 @@ body,
   cursor: pointer;
   z-index: 3;
   box-shadow: 0 0 0 6px #f5f5f5;
+    transition: transform 0.3s ease, box-shadow 0.25s ease;
 }
 
 /* Fan items */
@@ -703,7 +705,7 @@ body,
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: #1677ff;   /* ANT BLUE */
+  background: #1677ff;      
   color: white;
   border: none;
   font-size: 11px;
@@ -711,8 +713,12 @@ body,
   transform: translate(-50%, -50%);
   opacity: 0;
   pointer-events: none;
-  transition: transform 0.35s ease, opacity 0.2s ease;
+  transition: transform 0.35s ease, opacity 0.2s ease,
+              box-shadow 0.25s ease, filter 0.25s ease;
   z-index: 2;
+  box-shadow:
+    0 4px 10px rgba(0, 0, 0, 0.50),      
+    0 0 0 0 rgba(22, 119, 255, 0.6);      
 }
 
 .fan-menu.open .fan-item {
@@ -720,10 +726,9 @@ body,
   pointer-events: auto;
 }
 
-/* Right-side circular arc
-   - smaller radius (closer to App)
-   - larger angles (more spacing between items)
-*/
+.fan-menu.open .fan-main {
+  transform: rotate(90deg);
+}
 
 .fan-menu.open .item-0 {
   transform: translate(-50%, -50%)
@@ -745,11 +750,25 @@ body,
              translateX(70px)
              rotate(-45deg);
 }
+.fan-menu.open .item-3 {
+  transform: translate(-50%, -50%)
+             rotate(-90deg)
+             translateX(75px)
+             translateY(-10px)
+             rotate(90deg);
+}
+.fan-menu.open .item-4 {
+  transform: translate(-50%, -50%)
+             rotate(90deg)
+             translateX(75px)
+             translateY(10px)
+             rotate(-90deg);
+}
 
 /* Hover feedback */
 .fan-main:hover,
 .fan-item:hover {
-  background: #4096ff;   /* lighter blue on hover */
+  background: #56a0fc;   /* lighter blue on hover */
 }
 
 /* ================= PICK + APP ROW ================= */

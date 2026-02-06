@@ -6,6 +6,7 @@ import LeftSidebarPick from "./LeftSidebarPick";
 import LeftSidebarDraw from "./LeftSidebarDraw";
 import LeftSidebarSort from "./LeftSidebarSort";
 import Imagepreview from "./Imagepreview";
+import ConsoleOutput from "./ConsoleOutput";
 
 export default function Joystick() {
   const [mode, setMode] = useState("pick");
@@ -28,7 +29,9 @@ export default function Joystick() {
 
           <div className="upper-right">
             {/* Console */}
-            <div className="panel console">Console Output</div>
+            <div className="panel console">
+              <ConsoleOutput />
+            </div>
           </div>
         </div>
 

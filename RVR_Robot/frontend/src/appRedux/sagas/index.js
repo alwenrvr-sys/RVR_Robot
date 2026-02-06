@@ -1,6 +1,6 @@
 import { all, fork } from "redux-saga/effects";
 import { getUser } from "./Auth";
-import { triggerCamera } from "./Camera";
+import { triggerCamera,analyzeImage } from "./Camera";
 import {
   getRobotPing,
   getTcp,
@@ -18,6 +18,7 @@ export default function* rootSaga() {
     fork(robotMode),
     fork(robotEnable),
     fork(robotSafety),
-    fork(robotMoveL)
+    fork(robotMoveL),
+    fork(analyzeImage)
   ]);
 }
