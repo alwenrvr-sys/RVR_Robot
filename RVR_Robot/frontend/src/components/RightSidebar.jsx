@@ -9,12 +9,13 @@ import {
   stopRobot,
   resetRobotErrors,
   moveL,
+  pickUnpick
 } from "../appRedux/actions/Robot";
 import { useEffect, useState } from "react";
 
 export default function RightSidebar() {
   const dispatch = useDispatch();
-  const { moving, enabled, connected, mode, pose } = useSelector(
+  const { moving, enabled, connected, mode, pose,loading } = useSelector(
     (state) => state.robot,
   );
   const isDisabledState = enabled !== 1;
@@ -200,9 +201,14 @@ export default function RightSidebar() {
         </Button>
       </div>
 
-      <Button block disabled={!connected || isDisabledState}>
-        PICK / RELEASE
-      </Button>
+      <Button
+          block
+          loading={loading}
+          onClick={() => dispatch(pickUnpick())}
+          disabled={!connected || isDisabledState}
+        >
+          Pick & Place
+        </Button>
     </aside>
   );
 }

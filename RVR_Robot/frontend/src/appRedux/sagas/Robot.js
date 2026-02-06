@@ -21,6 +21,9 @@ import {
   ROBOT_MOVEL,
   ROBOT_MOVEL_SUCCESS,
   ROBOT_MOVEL_FAILURE,
+  ROBOT_PICK_UNPICK,
+  ROBOT_PICK_UNPICK_SUCCESS,
+  ROBOT_PICK_UNPICK_FAILURE,
 } from "../../constants/ActionType";
 import { ROBOT_SERVICE } from "../../services/RobotServices";
 
@@ -192,4 +195,24 @@ function* moveLAsync(action) {
 
 export function* robotMoveL() {
   yield takeEvery(ROBOT_MOVEL, moveLAsync);
+}
+
+function* pickUnpickAsync() {
+  try {
+    const response = yield call(ROBOT_SERVICE.PICK_UNPICK);
+
+    yield put({
+      type: ROBOT_PICK_UNPICK_SUCCESS,
+      payload: response.data,
+    });
+  } catch (error) {
+    yield put({
+      type: ROBOT_PICK_UNPICK_FAILURE,
+      payload: error.response?.data || error.message,
+    });
+  }
+}
+
+export function* pickUnpick() {
+  yield takeEvery(ROBOT_PICK_UNPICK, pickUnpickAsync);
 }

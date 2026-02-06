@@ -1,5 +1,6 @@
 import threading
 from app.sdk.fairino.Robot import RPC
+import time
 
 ROBOT_IP = "192.168.58.2"
 
@@ -148,3 +149,26 @@ class RobotService:
             self.robot.robot_state_pkg.actual_TCP_Speed[4],
             self.robot.robot_state_pkg.actual_TCP_Speed[5],
         ]
+
+#------------------PICK AND UNPICK-------------
+
+    def pick_unpick(self) -> dict:
+        err, (do_h, do_l) = self.get_do()
+        if err != 0:
+            raise RuntimeError("GetDO failed")
+
+        current = (do_l >> 0) & 1
+        new = 0 if current == 1 else 1
+        self.set_do(0, new)
+        time.sleep(0.05)
+        err2, (_, do_l_after) = self.get_do()
+        if err2 != 0:
+            raise RuntimeError("GetDO confirm failed")
+
+        confirmed = (do_l_after >> 0) & 1
+
+        return {
+            "success": confirmed == new,
+            "previous": current,
+            "current": confirmed,
+        }

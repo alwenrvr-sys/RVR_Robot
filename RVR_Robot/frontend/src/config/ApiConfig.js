@@ -17,5 +17,6 @@ export const APICONFIG = Object.freeze({
     STOP: "robot/stop",
     RESET: "robot/reset",
     MOVEL: "robot/moveL",
+    PICK_UNPICK: "robot/pick-unpick",
   },
 });

@@ -170,3 +170,11 @@ def get_robot_install_angle():
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+#--------------------PICK AND UNPICK-----------------
+@router.get("/pick-unpick")
+def pick_unpick():
+    try:
+        return robot.pick_unpick() 
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

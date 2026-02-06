@@ -7,7 +7,8 @@ import {
   robotMode,
   robotEnable,
   robotSafety,
-  robotMoveL
+  robotMoveL,
+  pickUnpick
 } from "./Robot";
 export default function* rootSaga() {
   yield all([
@@ -19,6 +20,7 @@ export default function* rootSaga() {
     fork(robotEnable),
     fork(robotSafety),
     fork(robotMoveL),
-    fork(analyzeImage)
+    fork(analyzeImage),
+    fork(pickUnpick)
   ]);
 }

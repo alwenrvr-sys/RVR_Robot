@@ -50,6 +50,10 @@ const moveL = async (pose) => {
   );
 };
 
+const pickUnpick = async () => {
+  return axios.get(HOST + ROBOT_API.PICK_UNPICK, { withCredentials: true });
+};
+
 export const ROBOT_SERVICE = {
   GET_TCP: getTcp,
   PING: pingRobot,
@@ -60,4 +64,5 @@ export const ROBOT_SERVICE = {
   STOP: stopRobot,
   RESET: resetErrors,
   MOVE_L: moveL,
+  PICK_UNPICK: pickUnpick,
 };

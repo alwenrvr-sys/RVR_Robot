@@ -14,6 +14,9 @@ import {
   ROBOT_MOVEL,
   ROBOT_MOVEL_SUCCESS,
   ROBOT_MOVEL_FAILURE,
+  ROBOT_PICK_UNPICK,
+  ROBOT_PICK_UNPICK_SUCCESS,
+  ROBOT_PICK_UNPICK_FAILURE,
 } from "../../constants/ActionType";
 
 const initialState = {
@@ -113,6 +116,27 @@ const Robot = (state = initialState, action) => {
       return {
         ...state,
         moving: false,
+        error: action.payload,
+      };
+
+    case ROBOT_PICK_UNPICK:
+      return {
+        ...state,
+        loading: true,
+        error: null,
+      };
+
+    case ROBOT_PICK_UNPICK_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        pickResult: action.payload,
+      };
+
+    case ROBOT_PICK_UNPICK_FAILURE:
+      return {
+        ...state,
+        loading: false,
         error: action.payload,
       };
       

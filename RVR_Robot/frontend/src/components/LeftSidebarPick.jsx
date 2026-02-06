@@ -1,7 +1,12 @@
 import { Button, InputNumber, Switch, Divider } from "antd";
 import { useDispatch, useSelector } from "react-redux";
-import { triggerCamera, analyzeImage ,uploadLocalImage} from "../appRedux/actions/Camera";
-import { stopRobot } from "../appRedux/actions/Robot";
+import { useEffect, useState } from "react";
+import {
+  triggerCamera,
+  analyzeImage,
+  uploadLocalImage,
+} from "../appRedux/actions/Camera";
+import { getTcp,stopRobot } from "../appRedux/actions/Robot";
 import RightFanMenu from "./RightFanMenu";
 
 export default function LeftSidebarPick({ onModeChange }) {
@@ -9,17 +14,30 @@ export default function LeftSidebarPick({ onModeChange }) {
   const { loading, result } = useSelector((state) => state.camera);
   const { pose } = useSelector((state) => state.robot);
   const { connected } = useSelector((state) => state.robot);
+  const [zValue, setZValue] = useState(null);
+
+  useEffect(() => {
+    dispatch(getTcp());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (pose?.z == null) return;
+
+    setZValue(pose.z);
+    console.log("Current Z value:", pose.z);
+  }, [pose?.z]);
 
   const scaleX = result?.scale_x_px_per_mm;
   const scaleY = result?.scale_y_px_per_mm;
 
   const handleTriggerCamera = () => {
-    if (!pose?.z) {
+    if (!zValue) {
       console.warn("TCP Z not available");
       return;
     }
-    dispatch(triggerCamera(pose.z));
+    dispatch(triggerCamera(zValue));
   };
+  
   const imageBase64 = result?.image_base64;
 
   const handleAnalyze = () => {

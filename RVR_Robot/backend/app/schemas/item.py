@@ -79,27 +79,16 @@ class AnalyzeImageRequest(BaseModel):
     
 class AnalyzeImageResponse(BaseModel):
     success: bool
-
-    # ---------- PIXEL GEOMETRY ----------
     center_px: Optional[Tuple[float, float]] = None
     static_center_px: Optional[Tuple[int, int]] = None
-
     contour_px: Optional[List[Tuple[int, int]]] = None
     box_px: Optional[List[Tuple[int, int]]] = None
     edges_px: Optional[List[Tuple[int, int]]] = None
-
-    # ---------- METRICS ----------
     distance_mm: Optional[float] = None
     theta_rect: Optional[float] = None
     theta_pca: Optional[float] = None
-
-    # ---------- ROBOT ----------
     target: Optional[Dict[str, float]] = None
-
-    # ---------- INSPECTION ----------
     inspection: Optional[Dict[str, Any]] = None
-
-    # ---------- OCR ----------
     ocr: Optional[str] = None
 
     reason: Optional[str] = None
