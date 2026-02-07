@@ -18,7 +18,14 @@ const stopAutoPick = () =>
     { withCredentials: true }
   );
 
+const getAutoPickStatus = () =>
+  axios.get(
+    HOST + APPLICATION_API.APP_PICKPLACE_STATUS,
+    { withCredentials: true }
+  );
+
 export const APPLICATION_SERVICE= {
   START: startAutoPick,
   STOP: stopAutoPick,
+  STATUS: getAutoPickStatus,
 };

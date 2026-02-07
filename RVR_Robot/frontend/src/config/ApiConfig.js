@@ -20,7 +20,8 @@ export const APICONFIG = Object.freeze({
     PICK_UNPICK: "robot/pick-unpick",
   },
   APPLICATION: {
-    APP_PICKPLACE_START: "robot/start",
-    APP_PICKPLACE_STOP: "robot/appstop",
+    APP_PICKPLACE_START: "app/1-start",
+    APP_PICKPLACE_STOP: "app/1-stop",
+    APP_PICKPLACE_STATUS:"app/1-status",
   },
 });

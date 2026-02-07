@@ -1,6 +1,7 @@
 import {
   APP_PICKPLACE_START,
   APP_PICKPLACE_STOP,
+  RESET_ANALYSIS,
 } from "../../constants/ActionType";
 
 export const startAutoPick = () => ({
@@ -9,4 +10,8 @@ export const startAutoPick = () => ({
 
 export const stopAutoPick = () => ({
   type: APP_PICKPLACE_STOP,
+});
+
+export const resetAnalysis = () => ({
+  type: RESET_ANALYSIS,
 });

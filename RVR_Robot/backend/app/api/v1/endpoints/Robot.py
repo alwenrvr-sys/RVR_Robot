@@ -1,13 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from app.robot.Robot_service import RobotService
-from threading import Lock
 from app.robot.Robot import get_robot
-from app.Applications.PickAndPlace import PickAndPlace
 from app.schemas.item import TcpPose,RobotInstallAngle,MotionParams,MoveLRequest
-
-_auto_lock = Lock()
-AUTO_RUNNING = False
-_auto_thread = None
 
 router = APIRouter(prefix="/robot", tags=["Robot"])
 
@@ -185,52 +179,3 @@ def pick_unpick():
         return robot.pick_unpick() 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
-@router.post("/start")
-def start_auto_pick_place():
-    global AUTO_RUNNING, _auto_thread
-
-    with _auto_lock:
-        if AUTO_RUNNING:
-            return {
-                "success": False,
-                "message": "AUTO PickAndPlace already running"
-            }
-
-        try:
-            _auto_thread = PickAndPlace()
-            AUTO_RUNNING = True
-
-            return {
-                "success": True,
-                "message": "AUTO PickAndPlace started"
-            }
-
-        except Exception as e:
-            AUTO_RUNNING = False
-            raise HTTPException(status_code=500, detail=str(e))
-        
-
-@router.post("/appstop")
-def stop_auto_pick_place():
-    global AUTO_RUNNING
-    with _auto_lock:
-        if not AUTO_RUNNING:
-            return {
-                "success": False,
-                "message": "AUTO PickAndPlace is not running"
-            }
-        try:
-            # This flag is checked inside the worker loop
-            import app.Applications.PickAndPlace as pp
-            pp.AUTO_RUN = False
-
-            AUTO_RUNNING = False
-
-            return {
-                "success": True,
-                "message": "AUTO PickAndPlace stopping"
-            }
-
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))

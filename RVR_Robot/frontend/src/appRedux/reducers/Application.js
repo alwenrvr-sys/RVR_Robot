@@ -5,17 +5,24 @@ import {
   APP_PICKPLACE_STOP,
   APP_PICKPLACE_STOP_SUCCESS,
   APP_PICKPLACE_STOP_FAILURE,
+  APP_PICKPLACE_STATUS_SUCCESS,
+  APP_PICKPLACE_STATUS_FAILURE,
+  RESET_ANALYSIS,
 } from "../../constants/ActionType";
 
 const initialState = {
   running: false,
   loading: false,
+  stage: "idle",
+  image_base64: null,
+  analysis: null,
+  target_pose: null,
+  tcp: null,
   error: null,
 };
 
 const Applications = (state = initialState, action) => {
   switch (action.type) {
-
     case APP_PICKPLACE_START:
       return {
         ...state,
@@ -56,6 +63,24 @@ const Applications = (state = initialState, action) => {
         ...state,
         loading: false,
         error: action.payload,
+      };
+
+    case APP_PICKPLACE_STATUS_SUCCESS:
+      return {
+        ...state,
+        ...action.payload,
+        error: null,
+      };
+
+    case APP_PICKPLACE_STATUS_FAILURE:
+      return {
+        ...state,
+        error: action.payload,
+      };
+
+    case RESET_ANALYSIS:
+      return {
+        ...initialState, 
       };
 
     default:

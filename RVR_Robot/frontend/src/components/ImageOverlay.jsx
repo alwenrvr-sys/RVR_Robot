@@ -4,12 +4,14 @@ import { useSelector } from "react-redux";
 export default function ImageOverlay({ imgRef }) {
   const canvasRef = useRef(null);
 
-  const result = useSelector((state) => state.camera.result);
-  const analyze = useSelector((state) => state.camera.analyzeResult);
+  const { running, analysis } = useSelector((state) => state.app);
+  const cameraAnalyze = useSelector((state) => state.camera.analyzeResult);
+
+  const analyzeResult = running ? analysis : cameraAnalyze;
 
   useEffect(() => {
-    if (!imgRef.current || !canvasRef.current || !analyze) return;
-
+    if (!imgRef.current || !canvasRef.current || !analyzeResult) return;
+    const analyze = analyzeResult;
     const img = imgRef.current;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
@@ -86,9 +88,7 @@ export default function ImageOverlay({ imgRef }) {
 
       analyze.edges_px.forEach((p, i) => {
         const p1 = S(p);
-        const p2 = S(
-          analyze.edges_px[(i + 1) % analyze.edges_px.length]
-        );
+        const p2 = S(analyze.edges_px[(i + 1) % analyze.edges_px.length]);
 
         ctx.beginPath();
         ctx.moveTo(...p1);
@@ -101,7 +101,7 @@ export default function ImageOverlay({ imgRef }) {
         ctx.fillText(
           `${analyze.inspection.edges_mm[i].toFixed(1)} mm`,
           mx + 4,
-          my - 4
+          my - 4,
         );
       });
     }
@@ -120,7 +120,7 @@ export default function ImageOverlay({ imgRef }) {
         ctx.fillText(`Ø ${h.diameter_mm.toFixed(2)} mm`, x + 8, y);
       });
     }
-  }, [analyze, imgRef]);
+  }, [analyzeResult, imgRef]);
 
   return (
     <canvas

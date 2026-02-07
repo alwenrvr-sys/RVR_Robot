@@ -93,3 +93,29 @@ class AnalyzeImageResponse(BaseModel):
 
     reason: Optional[str] = None
 
+class AutoPickPlaceStartRequest(BaseModel):
+    pass
+
+class AutoPickPlaceStartResponse(BaseModel):
+    success: bool
+    message: str
+    auto_run: bool
+    
+class AutoPickPlaceStopRequest(BaseModel):
+    pass
+
+class AutoPickPlaceStopResponse(BaseModel):
+    success: bool
+    message: str
+    auto_run: bool
+
+class AutoPickPlaceStatusResponse(BaseModel):
+    success: Optional[bool] = None
+    stage: str                      # <-- NEW
+    image_base64: Optional[str] = None
+    analysis: Optional[dict] = None
+    target_pose: Optional[List[float]] = None
+    tcp: Optional[List[float]] = None
+    error: Optional[str] = None
+    auto_run: bool
+

@@ -6,6 +6,7 @@ import {
   ANALYZE_IMAGE_SUCCESS,
   ANALYZE_IMAGE_FAILURE,
   CAMERA_LOCAL_IMAGE,
+  RESET_ANALYSIS
 } from "../../constants/ActionType";
 
 const initialState = {
@@ -37,7 +38,7 @@ const Camera = (state = initialState, action) => {
         ...state,
         loading: false,
         result: {
-          ...(state.result || {}), 
+          ...(state.result || {}),
           image_base64: action.payload,
         },
       };
@@ -69,7 +70,10 @@ const Camera = (state = initialState, action) => {
         loading: false,
         error: action.payload,
       };
-
+    case RESET_ANALYSIS:
+      return {
+        ...initialState, 
+      };
     default:
       return state;
   }
