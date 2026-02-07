@@ -7,6 +7,7 @@ ROBOT_IP = "192.168.58.2"
 MOVE_VEL = 50   
 MOVE_ACC = 10    
 OVL = 100.0       
+SAFE_Z_LIFT = 80
 
 class RobotService:
     def __init__(self):
@@ -172,3 +173,110 @@ class RobotService:
             "previous": current,
             "current": confirmed,
         }
+
+#-------------HELPERS-------------
+    def _errcode(self, ret):
+        if isinstance(ret, (list, tuple)):
+            return int(ret[0])
+        return int(ret)
+
+    def set_plan_preview_l(self, a, c, b, sim_errcodes=None):
+        def dist_mm(p1, p2):
+            return ((p1[0]-p2[0])**2 +
+                    (p1[1]-p2[1])**2 +
+                    (p1[2]-p2[2])**2) ** 0.5
+        preview = {
+            "A_tcp": [round(v, 3) for v in a],
+            "C_tcp": [round(v, 3) for v in c],
+            "B_tcp": [round(v, 3) for v in b],
+            "distance_mm": {
+                "A_to_C": round(dist_mm(a, c), 2),
+                "C_to_B": round(dist_mm(c, b), 2),
+                "total": round(dist_mm(a, c) + dist_mm(c, b), 2),
+            }
+        }
+        if sim_errcodes is not None:
+            preview["sim_move_l_errcodes"] = sim_errcodes
+        return preview
+
+    def sim_move_l(self, pose, sim_flag=1):
+        if len(pose) != 6:
+            raise ValueError("pose must be [x,y,z,rx,ry,rz]")
+        pose = list(map(float, pose))
+        sim_flag = int(sim_flag)
+        with self.lock:
+            return self.robot.SimMoveL(
+                pose[0], pose[1], pose[2],      # x y z
+                pose[3], pose[4], pose[5],      # rx ry rz
+                0,                              # toolNum
+                0,                              # workPieceNum
+                MOVE_VEL,                       # speed
+                MOVE_ACC,                       # acc
+                int(OVL),                       # ovl
+                -1,                             # blendR
+                0.0, 0.0, 0.0, 0.0,             # exaxis 1~4
+                0,                              # search_flag
+                0,                              # offset_flag
+                0.0, 0.0, 0.0,                  # dt_x dt_y dt_z
+                0.0, 0.0, 0.0,                  # dt_rx dt_ry dt_rz
+                MOVE_ACC,                       # oacc
+                sim_flag                        # simFlag
+            )
+            
+    def move_to_pose_l(self, target_pose, simulate=True):
+        try:
+            if len(target_pose) != 6:
+                raise ValueError("target_pose must be [x,y,z,rx,ry,rz]")
+
+            # ---- Read current TCP (A) ----
+            err, cur_pose = self.get_tcp()
+            if err != 0:
+                raise RuntimeError("Failed to read current TCP")
+
+            # ---- Build Z-lift waypoint C ----
+            via_pose = list(target_pose)
+            via_pose[2] += SAFE_Z_LIFT
+
+            # ---- IK reachability check ----
+            ret_c, joints_c = self.ik(via_pose)
+            ret_b, joints_b = self.ik(target_pose)
+
+            if ret_c != 0 or ret_b != 0:
+                raise RuntimeError("IK failed (pose unreachable)")
+
+            sim_codes = None
+
+            # ---- SimMoveL A → C → B ----
+            if simulate and hasattr(self.robot, "SimMoveL"):
+                e1 = self._errcode(self.sim_move_l(cur_pose, 1))
+                e2 = self._errcode(self.sim_move_l(via_pose, 2))
+                e3 = self._errcode(self.sim_move_l(target_pose, 3))
+
+                sim_codes = {"A": e1, "C": e2, "B": e3}
+
+                if e1 != 0 or e2 != 0 or e3 != 0:
+                    raise RuntimeError(f"SimMoveL failed: {sim_codes}")
+
+            # ---- Execute real MoveL ----
+            self.move_l(via_pose)
+            time.sleep(0.05)
+            self.move_l(target_pose)
+
+            return {
+                "success": True,
+                "A": cur_pose,
+                "C": via_pose,
+                "B": target_pose,
+                "z_lift": SAFE_Z_LIFT,
+                "joints": {
+                    "C": joints_c,
+                    "B": joints_b,
+                },
+                "sim_codes": sim_codes,
+            }
+
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e),
+            }

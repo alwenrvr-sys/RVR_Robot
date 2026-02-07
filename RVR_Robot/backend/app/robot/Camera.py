@@ -61,6 +61,17 @@ class SickCamera:
         print("[CAMERA] Trigger sent")
 
         self.last_z = current_z
+    
+    def trigger(self):
+        """
+        Trigger camera image capture (no AutoSetup, no Z check)
+        """
+        if not self.sock:
+            raise RuntimeError("Camera not connected")
+
+        self._send("trigger")
+        print("[CAMERA] Trigger sent")
+
 
     def close(self):
         if self.sock:

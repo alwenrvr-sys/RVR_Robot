@@ -6,7 +6,8 @@ import {
   analyzeImage,
   uploadLocalImage,
 } from "../appRedux/actions/Camera";
-import { getTcp,stopRobot } from "../appRedux/actions/Robot";
+import { getTcp } from "../appRedux/actions/Robot";
+import { startAutoPick, stopAutoPick } from "../appRedux/actions/Application";
 import RightFanMenu from "./RightFanMenu";
 
 export default function LeftSidebarPick({ onModeChange }) {
@@ -14,6 +15,7 @@ export default function LeftSidebarPick({ onModeChange }) {
   const { loading, result } = useSelector((state) => state.camera);
   const { pose } = useSelector((state) => state.robot);
   const { connected } = useSelector((state) => state.robot);
+  const { running } = useSelector((state) => state.app);
   const [zValue, setZValue] = useState(null);
 
   useEffect(() => {
@@ -37,7 +39,7 @@ export default function LeftSidebarPick({ onModeChange }) {
     }
     dispatch(triggerCamera(zValue));
   };
-  
+
   const imageBase64 = result?.image_base64;
 
   const handleAnalyze = () => {
@@ -102,7 +104,12 @@ export default function LeftSidebarPick({ onModeChange }) {
 
       {/* ===== PICK & PLACE + APP SELECTOR ===== */}
       <div className="pick-app-row">
-        <Button type="primary" block>
+        <Button
+          type="primary"
+          block
+          disabled={running}
+          onClick={() => dispatch(startAutoPick())}
+        >
           Pick & Place
         </Button>
 
@@ -113,7 +120,7 @@ export default function LeftSidebarPick({ onModeChange }) {
         danger
         block
         disabled={!connected}
-        onClick={() => dispatch(stopRobot())}
+        onClick={() => dispatch(stopAutoPick())}
       >
         STOP
       </Button>
