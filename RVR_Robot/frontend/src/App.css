@@ -45,6 +45,7 @@ body,
   flex: 3; /* takes more space */
   display: flex;
   gap: 12px;
+  min-height: 0;
 }
 
 .upper-left {
@@ -55,6 +56,7 @@ body,
 .upper-right {
   flex: 1; /* console smaller */
   display: flex;
+  min-height: 0;
 }
 
 /* ================= LOWER ================= */
@@ -88,7 +90,6 @@ body,
   flex-direction: column;
 }
 
-
 /* ================= CONSOLE ================= */
 
 .console {
@@ -115,8 +116,7 @@ body,
   overflow-x: hidden;
 }
 
-
-.sidebar.left ,
+.sidebar.left,
 .pick-app-row {
   overflow: visible !important;
 }
@@ -168,7 +168,7 @@ body,
 .tcp-grid {
   display: flex;
   flex-direction: column;
-  gap: 8px; 
+  gap: 8px;
   margin-bottom: 14px;
 }
 
@@ -336,7 +336,7 @@ body,
   background: #ffffff;
   padding: 14px;
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .ml-right {
@@ -585,7 +585,7 @@ body,
   background: #ffffff;
   border-radius: 12px;
   padding: 12px;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
 }
@@ -680,7 +680,7 @@ body,
 /* Reserve horizontal space so items don't overlap STOP */
 .fan-slot {
   position: relative;
-  width: 170px;          /* slightly smaller */
+  width: 170px; /* slightly smaller */
   height: 60px;
   margin: 8px 0;
   z-index: 20;
@@ -698,14 +698,16 @@ body,
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: #1677ff;   /* ANT BLUE */
+  background: #1677ff; /* ANT BLUE */
   color: white;
   border: none;
   font-size: 20px;
   cursor: pointer;
   z-index: 3;
   box-shadow: 0 0 0 6px #f5f5f5;
-    transition: transform 0.3s ease, box-shadow 0.25s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.25s ease;
 }
 
 /* Fan items */
@@ -716,7 +718,7 @@ body,
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: #1677ff;      
+  background: #1677ff;
   color: white;
   border: none;
   font-size: 11px;
@@ -724,12 +726,15 @@ body,
   transform: translate(-50%, -50%);
   opacity: 0;
   pointer-events: none;
-  transition: transform 0.35s ease, opacity 0.2s ease,
-              box-shadow 0.25s ease, filter 0.25s ease;
+  transition:
+    transform 0.35s ease,
+    opacity 0.2s ease,
+    box-shadow 0.25s ease,
+    filter 0.25s ease;
   z-index: 2;
   box-shadow:
-    0 4px 10px rgba(0, 0, 0, 0.50),      
-    0 0 0 0 rgba(22, 119, 255, 0.6);      
+    0 4px 10px rgba(0, 0, 0, 0.5),
+    0 0 0 0 rgba(22, 119, 255, 0.6);
 }
 
 .fan-menu.open .fan-item {
@@ -742,44 +747,29 @@ body,
 }
 
 .fan-menu.open .item-0 {
-  transform: translate(-50%, -50%)
-             rotate(-45deg)
-             translateX(70px)
-             rotate(45deg);
+  transform: translate(-50%, -50%) rotate(-45deg) translateX(70px) rotate(45deg);
 }
 
 .fan-menu.open .item-1 {
-  transform: translate(-50%, -50%)
-             rotate(0deg)
-             translateX(85px)
-             rotate(0deg);
+  transform: translate(-50%, -50%) rotate(0deg) translateX(85px) rotate(0deg);
 }
 
 .fan-menu.open .item-2 {
-  transform: translate(-50%, -50%)
-             rotate(45deg)
-             translateX(70px)
-             rotate(-45deg);
+  transform: translate(-50%, -50%) rotate(45deg) translateX(70px) rotate(-45deg);
 }
 .fan-menu.open .item-3 {
-  transform: translate(-50%, -50%)
-             rotate(-90deg)
-             translateX(75px)
-             translateY(-10px)
-             rotate(90deg);
+  transform: translate(-50%, -50%) rotate(-90deg) translateX(75px)
+    translateY(-10px) rotate(90deg);
 }
 .fan-menu.open .item-4 {
-  transform: translate(-50%, -50%)
-             rotate(90deg)
-             translateX(75px)
-             translateY(10px)
-             rotate(-90deg);
+  transform: translate(-50%, -50%) rotate(90deg) translateX(75px)
+    translateY(10px) rotate(-90deg);
 }
 
 /* Hover feedback */
 .fan-main:hover,
 .fan-item:hover {
-  background: #56a0fc;   /* lighter blue on hover */
+  background: #56a0fc; /* lighter blue on hover */
 }
 
 /* ================= PICK + APP ROW ================= */
@@ -794,7 +784,7 @@ body,
 .pick-app-row .fan-slot {
   position: absolute;
   top: 50%;
-  right: -25px;              /* pushes half outside sidebar */
+  right: -25px; /* pushes half outside sidebar */
   transform: translateY(-50%);
   width: auto;
   height: auto;
@@ -820,7 +810,20 @@ body,
 .path-canvas {
   background:
     linear-gradient(#1a1a1a 1px, transparent 1px),
-    linear-gradient(90deg, #1a1a1a 1px, transparent 1px),
-    #0f0f0f;
+    linear-gradient(90deg, #1a1a1a 1px, transparent 1px), #0f0f0f;
   background-size: 20px 20px;
+}
+
+.panel.console {
+  background: #0f172a;
+  color: #e5e7eb;
+  font-family: monospace;
+  font-size: 13px;
+
+  display: flex;
+  flex-direction: column;
+
+  flex: 1;
+  min-height: 0; /* 🔴 REQUIRED */
+  overflow: hidden;
 }

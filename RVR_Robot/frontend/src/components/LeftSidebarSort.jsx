@@ -13,7 +13,7 @@ import {
   stopAutoPick,
   resetAnalysis,
 } from "../appRedux/actions/Application";
-import RightFanMenu from "./RightFanMenu";
+import LeftFanMenu from "./LeftFanMenu";
 
 export default function LeftSidebarSort({ onModeChange }) {
   const dispatch = useDispatch();
@@ -160,7 +160,7 @@ export default function LeftSidebarSort({ onModeChange }) {
           {running ? "AUTO RUNNING…" : "Pick & Place"}
         </Button>
 
-        <RightFanMenu onSelect={onModeChange} />
+        <LeftFanMenu onSelect={onModeChange} />
       </div>
 
       <Button

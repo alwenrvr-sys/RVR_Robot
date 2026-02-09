@@ -8,10 +8,11 @@ from app.schemas.item import (
 )
 from app.schemas.item import (
     AnalyzeImageRequest,
-    AnalyzeImageResponse
+    AnalyzeImageResponse,
+    AllAnalyzeImageResponse
 )
 from app.robot.Camera_service import trigger_camera,run_camera_autosetup
-from app.robot.Helpers import analyze_image
+from app.robot.Helpers import analyze_image,sort_analyze_image
 
 router = APIRouter(prefix="/camera", tags=["Camera"])
 
@@ -40,7 +41,34 @@ async def run_autosetup_api():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/analyze", response_model=AnalyzeImageResponse)
+# @router.post("/analyze", response_model=AnalyzeImageResponse)
+# def analyze_image_api(payload: AnalyzeImageRequest):
+#     try:
+#         # ---- decode base64 image ----
+#         img_bytes = base64.b64decode(payload.image_base64)
+#         img_np = np.frombuffer(img_bytes, np.uint8)
+#         bgr = cv2.imdecode(img_np, cv2.IMREAD_COLOR)
+
+#         if bgr is None:
+#             raise RuntimeError("Invalid image")
+
+#         # ---- call vision core ----
+#         result = analyze_image(
+#             bgr=bgr,
+#             tcp=payload.tcp,
+#             white_thresh=payload.white_thresh,
+#             auto_thresh=payload.auto_thresh,
+#             enable_edges=payload.enable_edges,
+#             # enable_ocr=payload.enable_ocr,
+#             # ocr_roi=payload.ocr_roi
+#         )
+
+#         return result
+
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/analyze", response_model=AllAnalyzeImageResponse)
 def analyze_image_api(payload: AnalyzeImageRequest):
     try:
         # ---- decode base64 image ----
@@ -52,7 +80,7 @@ def analyze_image_api(payload: AnalyzeImageRequest):
             raise RuntimeError("Invalid image")
 
         # ---- call vision core ----
-        result = analyze_image(
+        result = sort_analyze_image(
             bgr=bgr,
             tcp=payload.tcp,
             white_thresh=payload.white_thresh,

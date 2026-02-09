@@ -14,9 +14,7 @@ import Pathpreview from "./Pathpreview";
 export default function Joystick() {
   const [mode, setMode] = useState("pick");
 
-  const { loading, autosetupLoading } = useSelector(
-    (state) => state.camera
-  );
+  const { loading, autosetupLoading } = useSelector((state) => state.camera);
 
   const previewLoading = loading || autosetupLoading;
 

@@ -68,6 +68,18 @@ class MotionParams(BaseModel):
 class MoveLRequest(BaseModel):
     pose: List[float]  # [x, y, z, rx, ry, rz]
 
+class DetectedObject(BaseModel):
+    id: int
+    center_px: Tuple[float, float]
+    static_center_px: Tuple[int, int]
+    contour_px: List[Tuple[int, int]]
+    box_px: List[Tuple[int, int]]
+    theta_rect: float
+    theta_pca: float
+    distance_mm: float
+    target: Dict[str, float]
+    edges_px: Optional[List[Tuple[int, int]]] = None
+    inspection: Optional[Dict[str, Any]] = None
 
 class AnalyzeImageRequest(BaseModel):
     image_base64: str              # frontend sends base64 image
@@ -92,7 +104,12 @@ class AnalyzeImageResponse(BaseModel):
     target: Optional[Dict[str, float]] = None
     inspection: Optional[Dict[str, Any]] = None
     ocr: Optional[str] = None
+    reason: Optional[str] = None
 
+class AllAnalyzeImageResponse(BaseModel):
+    success: bool
+    count: int
+    objects: List[DetectedObject]
     reason: Optional[str] = None
 
 class AutoPickPlaceStartRequest(BaseModel):

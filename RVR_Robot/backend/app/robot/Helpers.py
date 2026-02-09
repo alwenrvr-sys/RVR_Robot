@@ -106,6 +106,24 @@ def detect_holes_from_hierarchy(contours, hierarchy, sx, sy):
         })
     return holes
 
+def get_child_contours(parent_contour, contours, hierarchy):
+    children = []
+    parent_idx = None
+
+    for i, c in enumerate(contours):
+        if np.array_equal(c, parent_contour):
+            parent_idx = i
+            break
+
+    if parent_idx is None:
+        return children
+
+    for i, h in enumerate(hierarchy[0]):
+        if h[3] == parent_idx:  # parent index
+            children.append(contours[i])
+
+    return children
+
 
 def measure_edges_and_holes(contours, sx: float, sy: float):
     results = {
@@ -155,8 +173,6 @@ def analyze_image(
     white_thresh=150,
     auto_thresh=True,
     enable_edges=False,
-    # enable_ocr=False,
-    # ocr_roi=None
 ):
     gray = cv2.cvtColor(bgr, cv2.COLOR_BGR2GRAY)
     gray = cv2.GaussianBlur(gray, (5, 5), 0)
@@ -245,6 +261,154 @@ def analyze_image(
     #     result["ocr"] = text
 
     return result
+
+def sort_analyze_image(
+    bgr: np.ndarray,
+    tcp: list,
+    static_point_px=(640, 480),
+    white_thresh=150,
+    auto_thresh=True,
+    enable_edges=False,
+):
+    # ------------------ PREPROCESS ------------------
+    gray = cv2.cvtColor(bgr, cv2.COLOR_BGR2GRAY)
+    gray = cv2.GaussianBlur(gray, (5, 5), 0)
+
+    if auto_thresh:
+        _, mask = cv2.threshold(
+            gray, 0, 255,
+            cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU
+        )
+    else:
+        _, mask = cv2.threshold(
+            gray, white_thresh, 255,
+            cv2.THRESH_BINARY_INV
+        )
+
+    contours, hierarchy = cv2.findContours(
+        mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE
+    )
+
+    if not contours:
+        return {"success": False, "reason": "no contours found"}
+
+    # ------------------ FILTER OBJECTS ------------------
+    objects = filter_object_contours(contours, min_area=2000)
+
+    if not objects:
+        return {"success": False, "reason": "no valid objects"}
+
+    # ------------------ SCALE ------------------
+    z = tcp[2]
+    sx = scale_calculation(z)
+    sy = scale_calculation_y(z)
+
+    ax, ay = static_point_px
+    Rz = tcp[5]
+
+    results = []
+
+    # ------------------ PROCESS EACH OBJECT ------------------
+    for idx, subject in enumerate(objects):
+        M = cv2.moments(subject)
+        if M["m00"] == 0:
+            continue
+
+        cx = M["m10"] / M["m00"]
+        cy = M["m01"] / M["m00"]
+
+        # pixel → mm
+        dx = cx - ax
+        dy = cy - ay
+        dx_mm = dx / sx
+        dy_mm = dy / sy
+        dist_mm = math.hypot(dx_mm, dy_mm)
+
+        # orientation
+        theta_vector = (math.degrees(math.atan2(-dy, dx)) + 360.0) % 360.0
+        theta_rect, _, _, box = rect_orientation_deg(subject)
+        theta_pca = pca_orientation_deg(subject)
+
+        # robot transform
+        a1 = math.radians(Rz - 45.0)
+        a2 = math.radians(theta_vector + Rz - 45.0 - 90.0)
+
+        p = 46.5 * math.cos(a1) + dist_mm * math.cos(a2)
+        q = 46.5 * math.sin(a1) + dist_mm * math.sin(a2)
+
+        target_x = tcp[0] + p
+        target_y = tcp[1] + q
+
+        target_Rz = Rz
+        if theta_rect > 90:
+            target_Rz = Rz + (180 - theta_rect)
+        elif theta_rect < 90:
+            target_Rz = Rz - theta_rect
+
+        obj_result = {
+            "id": idx,
+            "center_px": [float(cx), float(cy)],
+            "static_center_px": list(static_point_px),
+            "contour_px": subject.reshape(-1, 2).astype(int).tolist(),
+            "box_px": box.astype(int).tolist(),
+            "theta_rect": theta_rect,
+            "theta_pca": theta_pca,
+            "distance_mm": dist_mm,
+            "target": {
+                "target_X": target_x,
+                "target_Y": target_y,
+                "target_Rz": target_Rz,
+            },
+        }
+
+        # ------------------ INSPECTION ------------------
+        if enable_edges:
+            # measure edges for THIS object only
+            measurements, approx_edges, _ = measure_edges_and_holes(
+                [subject], sx, sy
+            )
+
+            # detect holes INSIDE this object only
+            child_contours = get_child_contours(subject, contours, hierarchy)
+
+            holes = []
+            for c in child_contours:
+                area = cv2.contourArea(c)
+                if area < 300:
+                    continue
+
+                peri = cv2.arcLength(c, True)
+                if peri < 20:
+                    continue
+
+                circularity = 4 * math.pi * area / (peri * peri)
+                if circularity < 0.6:
+                    continue
+
+                (x, y), r_px = cv2.minEnclosingCircle(c)
+                r_mm = r_px / ((sx + sy) / 2)
+
+                holes.append({
+                    "center_px": (int(x), int(y)),
+                    "diameter_mm": 2 * r_mm
+                })
+
+            measurements["holes"] = holes
+            obj_result["inspection"] = measurements
+            obj_result["edges_px"] = approx_edges.reshape(-1, 2).astype(int).tolist()
+
+
+        results.append(obj_result)
+
+    # ------------------ SORT OBJECTS (OPTIONAL) ------------------
+    results.sort(key=lambda o: o["center_px"][0])  # left → right
+
+    return {
+        "success": True,
+        "count": len(results),
+        "objects": results,
+    }
+
 
 
 def wait_for_image_ready(path: str, timeout: float = 2.0) -> bool:

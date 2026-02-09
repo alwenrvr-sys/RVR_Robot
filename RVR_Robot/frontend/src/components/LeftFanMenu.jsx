@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { AppstoreOutlined } from "@ant-design/icons";
 
-export default function RightFanMenu({ onSelect }) {
+export default function LeftFanMenu({ onSelect }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 

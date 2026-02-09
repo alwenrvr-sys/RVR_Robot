@@ -13,7 +13,7 @@ import {
   stopAutoPick,
   resetAnalysis,
 } from "../appRedux/actions/Application";
-import RightFanMenu from "./RightFanMenu";
+import LeftFanMenu from "./LeftFanMenu";
 
 export default function LeftSidebarPick({ onModeChange }) {
   const dispatch = useDispatch();
@@ -21,9 +21,7 @@ export default function LeftSidebarPick({ onModeChange }) {
   const { autosetupLoading } = useSelector((state) => state.camera);
   const { pose } = useSelector((state) => state.robot);
   const { connected } = useSelector((state) => state.robot);
-  const { image_base64, running } = useSelector(
-    (state) => state.app,
-  );
+  const { image_base64, running } = useSelector((state) => state.app);
   const [zValue, setZValue] = useState(null);
   const isAuto = running;
   const uiLocked = autosetupLoading || isAuto;
@@ -160,7 +158,7 @@ export default function LeftSidebarPick({ onModeChange }) {
           {running ? "AUTO RUNNING…" : "Pick & Place"}
         </Button>
 
-        <RightFanMenu onSelect={onModeChange} />
+        <LeftFanMenu onSelect={onModeChange} />
       </div>
 
       <Button
@@ -220,7 +218,21 @@ export default function LeftSidebarPick({ onModeChange }) {
       <Toggle
         label="Auto WhiteThresh"
         checked={imageParams.autoWhiteThresh}
-        onChange={(v) => updateParam("autoWhiteThresh", v)}
+        onChange={(v) => {
+          updateParam("autoWhiteThresh", v);
+
+          if (!imageBase64 || !pose || isAuto) return;
+
+          dispatch(
+            analyzeImage({
+              image_base64: imageBase64,
+              tcp: [pose.x, pose.y, pose.z, pose.rx, pose.ry, pose.rz],
+              white_thresh: imageParams.whiteThresh,
+              auto_thresh: imageParams.autoWhiteThresh,
+              enable_edges: v, // IMPORTANT: use v
+            }),
+          );
+        }}
       />
 
       <Field label="WhiteThresh">

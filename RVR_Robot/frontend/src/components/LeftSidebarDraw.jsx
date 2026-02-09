@@ -2,7 +2,7 @@ import { Button, Divider, InputNumber } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import { stopRobot } from "../appRedux/actions/Robot";
 import { previewDXF, drawDXF } from "../appRedux/actions/Application";
-import RightFanMenu from "./RightFanMenu";
+import LeftFanMenu from "./LeftFanMenu";
 import { useState } from "react";
 
 export default function LeftSidebarDraw({ onModeChange }) {
@@ -88,7 +88,7 @@ export default function LeftSidebarDraw({ onModeChange }) {
           Run Sketch
         </Button>
 
-        <RightFanMenu onSelect={onModeChange} />
+        <LeftFanMenu onSelect={onModeChange} />
       </div>
 
       <Button

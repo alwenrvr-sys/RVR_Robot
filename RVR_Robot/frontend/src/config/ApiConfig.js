@@ -5,8 +5,9 @@ export const APICONFIG = Object.freeze({
   },
   CAMERA: {
     TRIGGER: "camera/trigger",
+    AUTOSETUP: "camera/autosetup",
     ANALYZE: "camera/analyze",
-    AUTOSETUP:"camera/autosetup",
+    ALLANALYZE:"camera/all/analyze"
   },
   ROBOT: {
     TCP: "robot/tcp",
@@ -23,8 +24,8 @@ export const APICONFIG = Object.freeze({
   APPLICATION: {
     APP_PICKPLACE_START: "app/1-start",
     APP_PICKPLACE_STOP: "app/1-stop",
-    APP_PICKPLACE_STATUS:"app/1-status",
-    PREVIEW:"app/preview",
-    DRAW:"app/draw",
+    APP_PICKPLACE_STATUS: "app/1-status",
+    PREVIEW: "app/preview",
+    DRAW: "app/draw",
   },
 });
