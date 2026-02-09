@@ -280,3 +280,26 @@ class RobotService:
                 "success": False,
                 "error": str(e),
             }
+            
+    def get_joint_soft_limits_deg(self):
+        """
+        Returns joint soft limits in degrees:
+        [
+        j1_min, j1_max,
+        j2_min, j2_max,
+        j3_min, j3_max,
+        j4_min, j4_max,
+        j5_min, j5_max,
+        j6_min, j6_max
+        ]
+        """
+        with self.lock:
+            err, limits = self.robot.GetJointSoftLimitDeg()
+
+        if err != 0 or limits is None:
+            raise RuntimeError("Failed to get joint soft limits")
+
+        if len(limits) != 12:
+            raise RuntimeError("Invalid joint soft limit data")
+
+        return limits

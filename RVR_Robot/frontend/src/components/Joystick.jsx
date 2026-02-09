@@ -7,6 +7,7 @@ import LeftSidebarDraw from "./LeftSidebarDraw";
 import LeftSidebarSort from "./LeftSidebarSort";
 import Imagepreview from "./Imagepreview";
 import ConsoleOutput from "./ConsoleOutput";
+import Pathpreview from "./Pathpreview";
 
 export default function Joystick() {
   const [mode, setMode] = useState("pick");
@@ -21,9 +22,8 @@ export default function Joystick() {
         {/* UPPER (split) */}
         <div className="center-upper">
           <div className="upper-left">
-            {/* Image / Camera Preview */}
             <div className="panel">
-              <Imagepreview />
+              {mode === "draw" ? <Pathpreview /> : <Imagepreview />}
             </div>
           </div>
 

@@ -8,6 +8,13 @@ import {
   APP_PICKPLACE_STATUS_SUCCESS,
   APP_PICKPLACE_STATUS_FAILURE,
   RESET_ANALYSIS,
+  DXF_PREVIEW,
+  DXF_PREVIEW_SUCCESS,
+  DXF_PREVIEW_FAILURE,
+  DXF_DRAW,
+  DXF_DRAW_SUCCESS,
+  DXF_DRAW_FAILURE,
+  DXF_RESET,
 } from "../../constants/ActionType";
 
 const initialState = {
@@ -18,6 +25,11 @@ const initialState = {
   analysis: null,
   target_pose: null,
   tcp: null,
+  previewPaths: null, // scaled DXF paths
+  drawPaths: null, // robot-ready paths
+  origin: null,
+  params: null,
+  pathCount: 0,
   error: null,
 };
 
@@ -80,8 +92,43 @@ const Applications = (state = initialState, action) => {
 
     case RESET_ANALYSIS:
       return {
-        ...initialState, 
+        ...initialState,
       };
+    case DXF_PREVIEW:
+    case DXF_DRAW:
+      return {
+        ...state,
+        loading: true,
+        error: null,
+      };
+
+    case DXF_PREVIEW_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        previewPaths: action.payload.paths,
+      };
+
+    case DXF_DRAW_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        drawPaths: action.payload.paths,
+        origin: action.payload.origin,
+        params: action.payload.params,
+        pathCount: action.payload.path_count,
+      };
+
+    case DXF_PREVIEW_FAILURE:
+    case DXF_DRAW_FAILURE:
+      return {
+        ...state,
+        loading: false,
+        error: action.payload,
+      };
+
+    case DXF_RESET:
+      return { ...initialState };
 
     default:
       return state;

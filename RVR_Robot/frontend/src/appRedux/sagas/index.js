@@ -10,7 +10,7 @@ import {
   robotMoveL,
   pickUnpick
 } from "./Robot";
-import {AppPickandPlace} from "./Application";
+import {AppPickandPlace,DXF} from "./Application";
 export default function* rootSaga() {
   yield all([
     fork(getUser),
@@ -23,6 +23,7 @@ export default function* rootSaga() {
     fork(robotMoveL),
     fork(analyzeImage),
     fork(pickUnpick),
-    fork(AppPickandPlace)
+    fork(AppPickandPlace),
+    fork(DXF),
   ]);
 }

@@ -23,5 +23,7 @@ export const APICONFIG = Object.freeze({
     APP_PICKPLACE_START: "app/1-start",
     APP_PICKPLACE_STOP: "app/1-stop",
     APP_PICKPLACE_STATUS:"app/1-status",
+    PREVIEW:"app/preview",
+    DRAW:"app/draw",
   },
 });

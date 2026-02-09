@@ -1,6 +1,8 @@
 from pydantic import BaseModel
 from typing import List, Optional, Tuple, Dict, Any
 
+Point2D = Tuple[float, float]
+
 class ItemCreate(BaseModel):
     name: str
     description: str
@@ -119,3 +121,23 @@ class AutoPickPlaceStatusResponse(BaseModel):
     error: Optional[str] = None
     auto_run: bool
 
+class DXFPreviewResponse(BaseModel):
+    success: bool
+    paths: List[List[Point2D]]   
+    width_mm: float = 148.0
+    height_mm: float = 210.0
+
+class DXFDrawRequest(BaseModel):
+    origin_x: float
+    origin_y: float
+    draw_z: float = 160.0
+    travel_z: float = 170.0
+    rx: float = 180.0
+    ry: float = 0.0
+    rz: float = 45.0
+
+class DXFDrawResponse(BaseModel):
+    success: bool
+    message: str
+    path_count: int
+    paths: List[List[Point2D]]

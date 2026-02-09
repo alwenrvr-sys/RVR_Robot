@@ -8,6 +8,12 @@ import {
   APP_PICKPLACE_STOP_FAILURE,
   APP_PICKPLACE_STATUS_SUCCESS,
   APP_PICKPLACE_STATUS_FAILURE,
+  DXF_PREVIEW,
+  DXF_PREVIEW_SUCCESS,
+  DXF_PREVIEW_FAILURE,
+  DXF_DRAW,
+  DXF_DRAW_SUCCESS,
+  DXF_DRAW_FAILURE,
 } from "../../constants/ActionType";
 
 import { APPLICATION_SERVICE } from "../../services/ApplicationServices";
@@ -80,4 +86,43 @@ function* stopAutoPickAsync() {
 export function* AppPickandPlace() {
   yield takeEvery(APP_PICKPLACE_START, startAutoPickAsync);
   yield takeEvery(APP_PICKPLACE_STOP, stopAutoPickAsync);
+}
+
+function* previewDXFAsync(action) {
+  try {
+    const res = yield call(APPLICATION_SERVICE.PREVIEW, action.payload);
+
+    yield put({
+      type: DXF_PREVIEW_SUCCESS,
+      payload: res.data,
+    });
+  } catch (err) {
+    yield put({
+      type: DXF_PREVIEW_FAILURE,
+      payload: err.response?.data || err.message,
+    });
+  }
+}
+
+/* ---------- DRAW ---------- */
+function* drawDXFAsync(action) {
+  try {
+    const res = yield call(APPLICATION_SERVICE.DRAW, action.payload);
+
+    yield put({
+      type: DXF_DRAW_SUCCESS,
+      payload: res.data,
+    });
+  } catch (err) {
+    yield put({
+      type: DXF_DRAW_FAILURE,
+      payload: err.response?.data || err.message,
+    });
+  }
+}
+
+/* ---------- WATCHER ---------- */
+export function* DXF() {
+  yield takeEvery(DXF_PREVIEW, previewDXFAsync);
+  yield takeEvery(DXF_DRAW, drawDXFAsync);
 }
