@@ -1,4 +1,4 @@
-import { call, put, takeEvery } from "redux-saga/effects";
+import { call, put, takeEvery ,select} from "redux-saga/effects";
 import {
   CAMERA_TRIGGER,
   CAMERA_TRIGGER_SUCCESS,
@@ -6,6 +6,9 @@ import {
   ANALYZE_IMAGE,
   ANALYZE_IMAGE_SUCCESS,
   ANALYZE_IMAGE_FAILURE,
+  RUN_AUTOSETUP_SUCCESS,
+  RUN_AUTOSETUP_FAILURE,
+  RUN_AUTOSETUP,
 } from "../../constants/ActionType";
 
 import { CAMERA_SERVICE } from "../../services/CameraServices";
@@ -37,7 +40,6 @@ export function* triggerCamera() {
   yield takeEvery(CAMERA_TRIGGER, triggerCameraAsync);
 }
 
-
 function* analyzeImageAsync(action) {
   try {
     const payload = action.payload;
@@ -63,4 +65,32 @@ function* analyzeImageAsync(action) {
 
 export function* analyzeImage() {
   yield takeEvery(ANALYZE_IMAGE, analyzeImageAsync);
+}
+function* runAutosetupAsync() {
+  try {
+    const res = yield call(CAMERA_SERVICE.AUTOSETUP);
+
+    yield put({
+      type: RUN_AUTOSETUP_SUCCESS,
+      payload: res.data,
+    });
+    const state = yield select((state) => state.robot);
+    const z = state.pose?.z;
+
+    if (z != null) {
+      yield put({
+        type: CAMERA_TRIGGER,
+        payload: { currentZ: z },
+      });
+    }
+  } catch (err) {
+    yield put({
+      type: RUN_AUTOSETUP_FAILURE,
+      payload: err.response?.data || err.message,
+    });
+  }
+}
+
+export function* runAutosetup() {
+  yield takeEvery(RUN_AUTOSETUP, runAutosetupAsync);
 }

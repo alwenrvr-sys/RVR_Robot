@@ -5,7 +5,8 @@ import {
   ANALYZE_IMAGE,
   ANALYZE_IMAGE_SUCCESS,
   ANALYZE_IMAGE_FAILURE,
-  CAMERA_LOCAL_IMAGE
+  CAMERA_LOCAL_IMAGE,
+  RUN_AUTOSETUP
 } from "../../constants/ActionType";
 
 export const triggerCamera = (currentZ) => ({
@@ -41,4 +42,8 @@ export const analyzeImageFailure = (error) => ({
 export const uploadLocalImage = (base64) => ({
   type: "CAMERA_LOCAL_IMAGE",
   payload: base64,
+});
+
+export const runAutosetup = () => ({
+  type: RUN_AUTOSETUP,
 });

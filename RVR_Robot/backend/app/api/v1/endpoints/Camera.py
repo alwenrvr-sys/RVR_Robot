@@ -10,7 +10,7 @@ from app.schemas.item import (
     AnalyzeImageRequest,
     AnalyzeImageResponse
 )
-from app.robot.Camera_service import trigger_camera
+from app.robot.Camera_service import trigger_camera,run_camera_autosetup
 from app.robot.Helpers import analyze_image
 
 router = APIRouter(prefix="/camera", tags=["Camera"])
@@ -28,6 +28,17 @@ async def trigger_camera_api(req: CameraTriggerRequest):
         "message": "Camera triggered",
         **result
     }
+    
+@router.post("/autosetup")
+async def run_autosetup_api():
+    try:
+        await run_camera_autosetup()
+        return {
+            "status": "ok",
+            "message": "Camera AutoSetup completed"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/analyze", response_model=AnalyzeImageResponse)
 def analyze_image_api(payload: AnalyzeImageRequest):

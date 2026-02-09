@@ -6,6 +6,7 @@ export const APICONFIG = Object.freeze({
   CAMERA: {
     TRIGGER: "camera/trigger",
     ANALYZE: "camera/analyze",
+    AUTOSETUP:"camera/autosetup",
   },
   ROBOT: {
     TCP: "robot/tcp",

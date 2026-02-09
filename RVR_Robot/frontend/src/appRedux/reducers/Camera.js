@@ -6,11 +6,15 @@ import {
   ANALYZE_IMAGE_SUCCESS,
   ANALYZE_IMAGE_FAILURE,
   CAMERA_LOCAL_IMAGE,
-  RESET_ANALYSIS
+  RESET_ANALYSIS,
+  RUN_AUTOSETUP,
+  RUN_AUTOSETUP_SUCCESS,
+  RUN_AUTOSETUP_FAILURE,
 } from "../../constants/ActionType";
 
 const initialState = {
   loading: false,
+  autosetupLoading: false,
   result: null,
   analyzeResult: null,
   error: null,
@@ -70,10 +74,32 @@ const Camera = (state = initialState, action) => {
         loading: false,
         error: action.payload,
       };
+
     case RESET_ANALYSIS:
       return {
-        ...initialState, 
+        ...initialState,
       };
+
+    case RUN_AUTOSETUP:
+      return {
+        ...state,
+        autosetupLoading: true,
+        error: null,
+      };
+
+    case RUN_AUTOSETUP_SUCCESS:
+      return {
+        ...state,
+        autosetupLoading: false,
+      };
+
+    case RUN_AUTOSETUP_FAILURE:
+      return {
+        ...state,
+        autosetupLoading: false,
+        error: action.payload,
+      };
+
     default:
       return state;
   }

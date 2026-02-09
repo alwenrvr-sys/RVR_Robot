@@ -5,6 +5,7 @@ import {
   triggerCamera,
   analyzeImage,
   uploadLocalImage,
+  runAutosetup,
 } from "../appRedux/actions/Camera";
 import { getTcp } from "../appRedux/actions/Robot";
 import {
@@ -17,13 +18,15 @@ import RightFanMenu from "./RightFanMenu";
 export default function LeftSidebarSort({ onModeChange }) {
   const dispatch = useDispatch();
   const { loading, result } = useSelector((state) => state.camera);
+  const { autosetupLoading } = useSelector((state) => state.camera);
   const { pose } = useSelector((state) => state.robot);
   const { connected } = useSelector((state) => state.robot);
-  const { stage, image_base64, target_pose, running } = useSelector(
+  const { image_base64, running } = useSelector(
     (state) => state.app,
   );
   const [zValue, setZValue] = useState(null);
   const isAuto = running;
+  const uiLocked = autosetupLoading || isAuto;
   const [imageParams, setImageParams] = useState({
     blur: 5,
     minArea: 10,
@@ -109,12 +112,28 @@ export default function LeftSidebarSort({ onModeChange }) {
   };
 
   return (
-    <aside className="sidebar left antd-sidebar">
+    <aside
+      className="sidebar left antd-sidebar"
+      style={{
+        pointerEvents: uiLocked ? "none" : "auto",
+        opacity: uiLocked ? 0.5 : 1,
+        transition: "opacity 0.2s ease",
+      }}
+    >
       {/* ================= ACTIONS ================= */}
       <h4 className="section-title">Pick & Sort</h4>
 
       <Button block onClick={handleUploadImage}>
         Upload Photo
+      </Button>
+
+      <Button
+        block
+        loading={autosetupLoading}
+        disabled={uiLocked}
+        onClick={() => dispatch(runAutosetup())}
+      >
+        Run AutoSetup
       </Button>
 
       <Button
@@ -138,7 +157,7 @@ export default function LeftSidebarSort({ onModeChange }) {
           disabled={running}
           onClick={() => dispatch(startAutoPick())}
         >
-          {running ? "AUTO RUNNING…" : "Pick & Sort"}
+          {running ? "AUTO RUNNING…" : "Pick & Place"}
         </Button>
 
         <RightFanMenu onSelect={onModeChange} />

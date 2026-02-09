@@ -14,7 +14,8 @@ class SickCamera:
         self.port = port
         self.sock = None
         self.last_z = None
-        self.z_threshold = 5.0 
+        self.z_threshold = 5.0
+        self.z_tolerance = 150
 
     def connect(self):
         """Connect to the camera."""
@@ -40,7 +41,7 @@ class SickCamera:
     def trigger_with_autosetup(self, current_z: float):
         """
         Trigger image.
-        Run AutoSetup only if Z height changed significantly.
+        Run AutoSetup only if Z change is greater than ±150.
         """
         if not self.sock:
             raise RuntimeError("Camera not connected")
@@ -49,19 +50,32 @@ class SickCamera:
 
         if self.last_z is None:
             run_autosetup = True
-        elif abs(current_z - self.last_z) > self.z_threshold:
+        elif abs(current_z - self.last_z) > self.z_tolerance:
             run_autosetup = True
 
         if run_autosetup:
-            print(f"[CAMERA] Z changed ({self.last_z} → {current_z}), running AutoSetup")
+            print(f"[CAMERA] Z changed significantly ({self.last_z} → {current_z}), running AutoSetup")
             self._send("call ImageProviderV2D:0 AutoSetup")
-            time.sleep(15)  # AutoSetup needs time
+            time.sleep(15)
+            self.last_z = current_z
+        else:
+            print(f"[CAMERA] Z change within ±{self.z_tolerance}, skipping AutoSetup")
 
         self._send("trigger")
         print("[CAMERA] Trigger sent")
+        
+    def run_autosetup(self):
+        """
+        Run camera AutoSetup explicitly.
+        """
+        if not self.sock:
+            raise RuntimeError("Camera not connected")
 
-        self.last_z = current_z
-    
+        print("[CAMERA] Running AutoSetup")
+        self._send("call ImageProviderV2D:0 AutoSetup")
+        time.sleep(15)  # Allow AutoSetup to complete
+        print("[CAMERA] AutoSetup completed")
+
     def trigger(self):
         """
         Trigger camera image capture (no AutoSetup, no Z check)
@@ -71,7 +85,6 @@ class SickCamera:
 
         self._send("trigger")
         print("[CAMERA] Trigger sent")
-
 
     def close(self):
         if self.sock:

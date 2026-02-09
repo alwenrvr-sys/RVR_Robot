@@ -50,6 +50,10 @@ def wait_for_image_ready(path: str, timeout: float = 2.0) -> bool:
 
     return False
 
+async def run_camera_autosetup():
+    camera = await get_camera()
+    await asyncio.to_thread(camera.run_autosetup)
+
 async def trigger_camera(current_z: float) -> Dict:
     camera = await get_camera()
 

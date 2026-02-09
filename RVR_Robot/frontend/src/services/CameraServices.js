@@ -29,7 +29,15 @@ const analyzeImage = async (payload) => {
   });
 };
 
+const runAutosetup = () =>
+  axios.post(
+    HOST + CAMERA_API.AUTOSETUP,
+    {},
+    { withCredentials: true },
+  );
+
 export const CAMERA_SERVICE = {
   CAMERA_TRIGGER: triggerCamera,
   ANALYZE: analyzeImage,
+  AUTOSETUP:runAutosetup,
 };
