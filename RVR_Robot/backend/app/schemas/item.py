@@ -84,7 +84,7 @@ class DetectedObject(BaseModel):
 class AnalyzeImageRequest(BaseModel):
     image_base64: str              # frontend sends base64 image
     tcp: List[float]               # [x,y,z,rx,ry,rz]
-
+    min_area:int = 2000
     white_thresh: int = 150
     auto_thresh: bool = True
     enable_edges: bool = False

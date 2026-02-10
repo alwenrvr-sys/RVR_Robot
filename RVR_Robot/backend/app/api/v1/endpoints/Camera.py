@@ -62,6 +62,7 @@ async def run_autosetup_api():
 #         result = analyze_image(
 #             bgr=bgr,
 #             tcp=payload.tcp,
+            # minarea=payload.min_area,
 #             white_thresh=payload.white_thresh,
 #             auto_thresh=payload.auto_thresh,
 #             enable_edges=payload.enable_edges,
@@ -89,6 +90,7 @@ def analyze_image_api(payload: AnalyzeImageRequest):
         result = sort_analyze_image(
             bgr=bgr,
             tcp=payload.tcp,
+            minarea=payload.min_area,
             white_thresh=payload.white_thresh,
             auto_thresh=payload.auto_thresh,
             enable_edges=payload.enable_edges,

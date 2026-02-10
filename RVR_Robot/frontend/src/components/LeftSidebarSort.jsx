@@ -26,10 +26,9 @@ export default function LeftSidebarSort({ onModeChange }) {
   );
   const [zValue, setZValue] = useState(null);
   const isAuto = running;
-  const uiLocked = autosetupLoading || isAuto;
+  const uiLocked = autosetupLoading;
   const [imageParams, setImageParams] = useState({
-    blur: 5,
-    minArea: 10,
+    minArea: 2000,
     enable_edges: false,
     morphCleanup: true,
     autoWhiteThresh: true,
@@ -82,6 +81,7 @@ export default function LeftSidebarSort({ onModeChange }) {
       analyzeImage({
         image_base64: imageBase64,
         tcp: [pose.x, pose.y, pose.z, pose.rx, pose.ry, pose.rz],
+        min_area: imageParams.minArea,
         white_thresh: imageParams.whiteThresh,
         auto_thresh: imageParams.autoWhiteThresh,
         enable_edges: imageParams.enable_edges,
@@ -123,14 +123,14 @@ export default function LeftSidebarSort({ onModeChange }) {
       {/* ================= ACTIONS ================= */}
       <h4 className="section-title">Pick & Sort</h4>
 
-      <Button block onClick={handleUploadImage}>
+      <Button block disabled={isAuto} onClick={handleUploadImage}>
         Upload Photo
       </Button>
 
       <Button
         block
         loading={autosetupLoading}
-        disabled={uiLocked}
+        disabled={uiLocked || isAuto}
         onClick={() => dispatch(runAutosetup())}
       >
         Run AutoSetup
@@ -179,15 +179,6 @@ export default function LeftSidebarSort({ onModeChange }) {
       {/* ================= IMAGE PROCESSING ================= */}
       <h4 className="section-title">Image Processing</h4>
 
-      <Field label="Blur">
-        <InputNumber
-          size="small"
-          min={0}
-          value={imageParams.blur}
-          onChange={(v) => updateParam("blur", v)}
-        />
-      </Field>
-
       <Field label="MinArea (px²)">
         <InputNumber
           size="small"
@@ -209,6 +200,7 @@ export default function LeftSidebarSort({ onModeChange }) {
             analyzeImage({
               image_base64: imageBase64,
               tcp: [pose.x, pose.y, pose.z, pose.rx, pose.ry, pose.rz],
+              min_area: imageParams.minArea,
               white_thresh: imageParams.whiteThresh,
               auto_thresh: imageParams.autoWhiteThresh,
               enable_edges: v, // IMPORTANT: use v
@@ -245,17 +237,6 @@ export default function LeftSidebarSort({ onModeChange }) {
       <Field label="Scale Y (px/mm)">
         <InputNumber size="small" step={0.1} precision={3} value={scaleY} />
       </Field>
-
-      <h4 className="section-title">Presets</h4>
-
-      <Button block>HOME-1</Button>
-      <Button block>HOME-2</Button>
-      <Button block>Focus-1</Button>
-      <Button block>Focus-2</Button>
-
-      <Button block type="dashed" style={{ marginTop: 8 }}>
-        + Add Preset
-      </Button>
 
       <Divider />
     </aside>

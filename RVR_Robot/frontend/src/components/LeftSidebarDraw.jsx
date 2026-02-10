@@ -101,18 +101,6 @@ export default function LeftSidebarDraw({ onModeChange }) {
       </Button>
 
       <Divider />
-
-      {/* ===== PRESETS ===== */}
-      <h4 className="section-title">Presets</h4>
-
-      <Button block>HOME-1</Button>
-      <Button block>HOME-2</Button>
-      <Button block>Focus-1</Button>
-      <Button block>Focus-2</Button>
-
-      <Button block type="dashed" style={{ marginTop: 8 }}>
-        + Add Preset
-      </Button>
     </aside>
   );
 }

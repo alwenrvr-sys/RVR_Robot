@@ -380,10 +380,12 @@ def sort_analyze_image(
     bgr: np.ndarray,
     tcp: list,
     static_point_px=(640, 480),
+    minarea=2000,
     white_thresh=150,
     auto_thresh=True,
     enable_edges=False,
 ):
+    print("minarea=",minarea)
     # ------------------ PREPROCESS ------------------
     gray = cv2.cvtColor(bgr, cv2.COLOR_BGR2GRAY)
     gray = cv2.GaussianBlur(gray, (5, 5), 0)
@@ -407,7 +409,7 @@ def sort_analyze_image(
         return {"success": False, "reason": "no contours found"}
 
     # ------------------ FILTER OBJECTS ------------------
-    objects = filter_object_contours(contours, min_area=2000)
+    objects = filter_object_contours(contours, min_area=minarea)
 
     if not objects:
         return {"success": False, "reason": "no valid objects"}
