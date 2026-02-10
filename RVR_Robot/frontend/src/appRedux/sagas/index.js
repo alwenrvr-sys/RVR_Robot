@@ -7,6 +7,7 @@ import {
   robotMode,
   robotEnable,
   robotSafety,
+  robotMotionParams,
   robotMoveL,
   pickUnpick,
 } from "./Robot";
@@ -27,5 +28,6 @@ export default function* rootSaga() {
     fork(pickUnpick),
     fork(AppPickandPlace),
     fork(DXF),
+    fork(robotMotionParams),
   ]);
 }

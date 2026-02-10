@@ -17,6 +17,12 @@ import {
   ROBOT_PICK_UNPICK,
   ROBOT_PICK_UNPICK_SUCCESS,
   ROBOT_PICK_UNPICK_FAILURE,
+  ROBOT_GET_MOTION_PARAMS,
+  ROBOT_GET_MOTION_PARAMS_SUCCESS,
+  ROBOT_GET_MOTION_PARAMS_FAILURE,
+  ROBOT_SET_MOTION_PARAMS,
+  ROBOT_SET_MOTION_PARAMS_SUCCESS,
+  ROBOT_SET_MOTION_PARAMS_FAILURE,
 } from "../../constants/ActionType";
 
 const initialState = {
@@ -27,6 +33,13 @@ const initialState = {
   saftey: null,
   moving: false,
   lastPose: null,
+  motionParams: {
+    vel: 50,
+    acc: 50,
+    ovl: 100,
+  },
+  loadingMotionParams: false,
+  motionParamsError: null,
   error: null,
 };
 
@@ -96,6 +109,35 @@ const Robot = (state = initialState, action) => {
       return {
         ...state,
         error: action.payload,
+      };
+    case ROBOT_GET_MOTION_PARAMS:
+    case ROBOT_SET_MOTION_PARAMS:
+      return {
+        ...state,
+        loadingMotionParams: true,
+        motionParamsError: null,
+      };
+
+    case ROBOT_GET_MOTION_PARAMS_SUCCESS:
+      return {
+        ...state,
+        loadingMotionParams: false,
+        motionParams: action.payload,
+      };
+
+    case ROBOT_SET_MOTION_PARAMS_SUCCESS:
+      return {
+        ...state,
+        loadingMotionParams: false,
+        motionParams: action.payload,
+      };
+
+    case ROBOT_GET_MOTION_PARAMS_FAILURE:
+    case ROBOT_SET_MOTION_PARAMS_FAILURE:
+      return {
+        ...state,
+        loadingMotionParams: false,
+        motionParamsError: action.payload,
       };
 
     case ROBOT_MOVEL:

@@ -7,6 +7,8 @@ import {
   enableRobot,
   disableRobot,
   stopRobot,
+  getMotionParams,
+  setMotionParams,
   resetRobotErrors,
   moveL,
   pickUnpick,
@@ -16,12 +18,31 @@ import { useEffect, useState } from "react";
 
 export default function RightSidebar() {
   const dispatch = useDispatch();
-  const { moving, enabled, connected, mode, pose, loading } = useSelector(
-    (state) => state.robot,
-  );
+  const { moving, enabled, connected, mode, pose, motionParams, loading } =
+    useSelector((state) => state.robot);
   const [simulate, setSimulate] = useState(true);
-  const [zLift, setZLift] = useState(0);
+  const [zLift, setZLift] = useState(80);
   const isDisabledState = enabled !== 1;
+  const [localMotion, setLocalMotion] = useState({
+    vel: null,
+    acc: null,
+    ovl: null,
+  });
+
+  useEffect(() => {
+    dispatch(getMotionParams());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (motionParams) {
+      setLocalMotion({
+        vel: motionParams.vel,
+        acc: motionParams.acc,
+        ovl: motionParams.ovl,
+      });
+    }
+  }, [motionParams]);
+
   const [tcp, setTcp] = useState({
     x: null,
     y: null,
@@ -132,33 +153,52 @@ export default function RightSidebar() {
         />
       </div>
       <Divider />
-      {/* ================= MOTION CONTROL ================= */}
+
       <h4 className="section-title">Motion Control</h4>
 
       <div className="robot-field">
         <label>Overall Speed (%)</label>
-        <InputNumber size="small" min={1} max={100} defaultValue={50} />
+        <InputNumber
+          size="small"
+          min={1}
+          max={100}
+          value={localMotion.ovl}
+          onChange={(v) => setLocalMotion((p) => ({ ...p, ovl: v }))}
+        />
       </div>
 
       <div className="robot-field">
-        <label>Joint Velocity (%)</label>
-        <InputNumber size="small" min={1} max={100} defaultValue={50} />
+        <label>Velocity (%)</label>
+        <InputNumber
+          size="small"
+          min={1}
+          max={100}
+          value={localMotion.vel}
+          onChange={(v) => setLocalMotion((p) => ({ ...p, vel: v }))}
+        />
       </div>
 
       <div className="robot-field">
-        <label>Joint Acceleration (%)</label>
-        <InputNumber size="small" min={1} max={100} defaultValue={50} />
+        <label>Acceleration (%)</label>
+        <InputNumber
+          size="small"
+          min={1}
+          max={100}
+          value={localMotion.acc}
+          onChange={(v) => setLocalMotion((p) => ({ ...p, acc: v }))}
+        />
       </div>
-
-      <div className="robot-field">
-        <label>TCP Velocity (mm/s)</label>
-        <InputNumber size="small" min={1} defaultValue={200} />
-      </div>
-
-      <div className="robot-field">
-        <label>TCP Acceleration (mm/s²)</label>
-        <InputNumber size="small" min={1} defaultValue={500} />
-      </div>
+      <Button
+        type="primary"
+        block
+        disabled={!connected || isDisabledState}
+        onClick={() => {
+          dispatch(setMotionParams(localMotion));
+          dispatch(showNotification("robot", "Motion parameters updated"));
+        }}
+      >
+        APPLY MOTION PARAMS
+      </Button>
 
       <Divider />
 

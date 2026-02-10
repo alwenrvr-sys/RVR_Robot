@@ -21,6 +21,8 @@ import {
   ROBOT_MOVEL_SUCCESS,
   ROBOT_MOVEL_FAILURE,
   ROBOT_PICK_UNPICK,
+  ROBOT_GET_MOTION_PARAMS,
+  ROBOT_SET_MOTION_PARAMS,
 } from "../../constants/ActionType";
 
 export const getTcp = () => ({
@@ -122,4 +124,13 @@ export const moveLFailure = (error) => ({
 
 export const pickUnpick = () => ({
   type: ROBOT_PICK_UNPICK,
+});
+
+export const getMotionParams = () => ({
+  type: ROBOT_GET_MOTION_PARAMS,
+});
+
+export const setMotionParams = (params) => ({
+  type: ROBOT_SET_MOTION_PARAMS,
+  payload: params,
 });

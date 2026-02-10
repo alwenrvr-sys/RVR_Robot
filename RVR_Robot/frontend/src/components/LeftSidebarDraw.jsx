@@ -11,8 +11,8 @@ export default function LeftSidebarDraw({ onModeChange }) {
   const { loading, previewPaths } = useSelector((state) => state.app);
 
   // ---- Draw parameters ----
-  const [originX, setOriginX] = useState(0);
-  const [originY, setOriginY] = useState(0);
+  const [originX, setOriginX] = useState(400);
+  const [originY, setOriginY] = useState(400);
   const [drawZ, setDrawZ] = useState(160);
   const [travelZ, setTravelZ] = useState(170);
 

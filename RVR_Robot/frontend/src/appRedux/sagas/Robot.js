@@ -24,6 +24,12 @@ import {
   ROBOT_PICK_UNPICK,
   ROBOT_PICK_UNPICK_SUCCESS,
   ROBOT_PICK_UNPICK_FAILURE,
+  ROBOT_GET_MOTION_PARAMS,
+  ROBOT_GET_MOTION_PARAMS_FAILURE,
+  ROBOT_GET_MOTION_PARAMS_SUCCESS,
+  ROBOT_SET_MOTION_PARAMS,
+  ROBOT_SET_MOTION_PARAMS_SUCCESS,
+  ROBOT_SET_MOTION_PARAMS_FAILURE,
 } from "../../constants/ActionType";
 import { showNotification } from "../actions/Notify";
 import { ROBOT_SERVICE } from "../../services/RobotServices";
@@ -256,4 +262,57 @@ function* pickUnpickAsync() {
 
 export function* pickUnpick() {
   yield takeEvery(ROBOT_PICK_UNPICK, pickUnpickAsync);
+}
+
+function* getMotionParamsAsync() {
+  try {
+    const response = yield call(ROBOT_SERVICE.GET_MOTION_PARAMS);
+    yield put({
+      type: ROBOT_GET_MOTION_PARAMS_SUCCESS,
+      payload: response.data,
+    });
+  } catch (error) {
+    const message =
+      error.response?.data?.detail ||
+      error.message ||
+      "Failed to get motion params";
+
+    yield put({
+      type: ROBOT_GET_MOTION_PARAMS_FAILURE,
+      payload: message,
+    });
+  }
+}
+
+function* setMotionParamsAsync(action) {
+  try {
+    const response = yield call(
+      ROBOT_SERVICE.SET_MOTION_PARAMS,
+      action.payload,
+    );
+
+    yield put({
+      type: ROBOT_SET_MOTION_PARAMS_SUCCESS,
+      payload: response.data.params,
+    });
+
+    yield put(showNotification("robot", "Motion parameters updated"));
+  } catch (error) {
+    const message =
+      error.response?.data?.detail ||
+      error.message ||
+      "Failed to set motion params";
+
+    yield put({
+      type: ROBOT_SET_MOTION_PARAMS_FAILURE,
+      payload: message,
+    });
+
+    yield put(showNotification("robot", message));
+  }
+}
+
+export function* robotMotionParams() {
+  yield takeEvery(ROBOT_GET_MOTION_PARAMS, getMotionParamsAsync);
+  yield takeEvery(ROBOT_SET_MOTION_PARAMS, setMotionParamsAsync);
 }

@@ -40,6 +40,14 @@ const resetErrors = async () => {
   return axios.get(HOST + ROBOT_API.RESET);
 };
 
+const getMotionParams = () => {
+  return axios.get(HOST + ROBOT_API.MOTION_PARAMS);
+};
+
+const setMotionParams = (params) => {
+  return axios.post(HOST + ROBOT_API.MOTION_PARAMS, params);
+};
+
 const moveL = async (data) => {
   return axios.post(HOST + ROBOT_API.MOVEL, data, {
     headers: { "Content-Type": "application/json" },
@@ -59,6 +67,8 @@ export const ROBOT_SERVICE = {
   DISABLE: disableRobot,
   STOP: stopRobot,
   RESET: resetErrors,
+  GET_MOTION_PARAMS: getMotionParams,
+  SET_MOTION_PARAMS: setMotionParams,
   MOVE_L: moveL,
   PICK_UNPICK: pickUnpick,
 };
