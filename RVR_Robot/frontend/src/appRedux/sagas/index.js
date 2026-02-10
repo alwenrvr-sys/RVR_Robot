@@ -1,6 +1,11 @@
 import { all, fork } from "redux-saga/effects";
 import { getUser } from "./Auth";
-import { triggerCamera, analyzeImage, runAutosetup ,getCameraPing} from "./Camera";
+import {
+  triggerCamera,
+  analyzeImage,
+  runAutosetup,
+  getCameraPing,
+} from "./Camera";
 import {
   getRobotPing,
   getTcp,
