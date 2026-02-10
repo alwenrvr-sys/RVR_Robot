@@ -23,11 +23,30 @@ const getAutoPickStatus = () =>
     withCredentials: true,
   });
 
+  const startPickandSort = () =>
+  axios.post(
+    HOST + APPLICATION_API.APP_PICKSORT_START,
+    {},
+    { withCredentials: true },
+  );
+
+const stopPickandSort = () =>
+  axios.post(
+    HOST + APPLICATION_API.APP_PICKSORT_STOP,
+    {},
+    { withCredentials: true },
+  );
+
+const getPickandSort = () =>
+  axios.get(HOST + APPLICATION_API.APP_PICKSORT_STATUS, {
+    withCredentials: true,
+  });
+
 const previewDXF = (file) => {
   const formData = new FormData();
   formData.append("file", file);
 
-  return axios.post(HOST + APPLICATION_API.PREVIEW, formData, {
+  return axios.post(HOST + APPLICATION_API.APP_PICKSORT_STATUS, formData, {
     withCredentials: true,
     headers: { "Content-Type": "multipart/form-data" },
   });
@@ -40,6 +59,9 @@ export const APPLICATION_SERVICE = {
   START: startAutoPick,
   STOP: stopAutoPick,
   STATUS: getAutoPickStatus,
+  START_SORT:startPickandSort,
+  STOP_SORT:stopPickandSort,
+  STATUS_SORT:getPickandSort,
   PREVIEW: previewDXF,
   DRAW: drawDXF,
 };

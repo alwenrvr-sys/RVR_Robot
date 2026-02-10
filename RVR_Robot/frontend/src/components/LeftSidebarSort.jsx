@@ -9,8 +9,8 @@ import {
 } from "../appRedux/actions/Camera";
 import { getTcp } from "../appRedux/actions/Robot";
 import {
-  startAutoPick,
-  stopAutoPick,
+  startAutoSort,
+  stopAutoSort,
   resetAnalysis,
 } from "../appRedux/actions/Application";
 import LeftFanMenu from "./LeftFanMenu";
@@ -155,9 +155,9 @@ export default function LeftSidebarSort({ onModeChange }) {
           type="primary"
           block
           disabled={running}
-          onClick={() => dispatch(startAutoPick())}
+          onClick={() => dispatch(startAutoSort())}
         >
-          {running ? "AUTO RUNNING…" : "Pick & Place"}
+          {running ? "AUTO RUNNING…" : "Pick & Sort"}
         </Button>
 
         <LeftFanMenu onSelect={onModeChange} />
@@ -169,7 +169,7 @@ export default function LeftSidebarSort({ onModeChange }) {
         disabled={!connected}
         onClick={() => {
           dispatch(resetAnalysis());
-          dispatch(stopAutoPick());
+          dispatch(stopAutoSort());
         }}
       >
         STOP

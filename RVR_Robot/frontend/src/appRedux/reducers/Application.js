@@ -15,6 +15,14 @@ import {
   DXF_DRAW_SUCCESS,
   DXF_DRAW_FAILURE,
   DXF_RESET,
+  APP_PICKSORT_START,
+  APP_PICKSORT_START_SUCCESS,
+  APP_PICKSORT_START_FAILURE,
+  APP_PICKSORT_STOP,
+  APP_PICKSORT_STOP_SUCCESS,
+  APP_PICKSORT_STOP_FAILURE,
+  APP_PICKSORT_STATUS_SUCCESS,
+  APP_PICKSORT_STATUS_FAILURE,
 } from "../../constants/ActionType";
 
 const initialState = {
@@ -25,8 +33,8 @@ const initialState = {
   analysis: null,
   target_pose: null,
   tcp: null,
-  previewPaths: null, // scaled DXF paths
-  drawPaths: null, // robot-ready paths
+  previewPaths: null,
+  drawPaths: null,
   origin: null,
   params: null,
   pathCount: 0,
@@ -130,6 +138,60 @@ const Applications = (state = initialState, action) => {
     case DXF_RESET:
       return { ...initialState };
 
+    case APP_PICKSORT_START:
+      return {
+        ...state,
+        loading: true,
+        error: null,
+      };
+
+    case APP_PICKSORT_START_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        running: true,
+      };
+
+    case APP_PICKSORT_START_FAILURE:
+      return {
+        ...state,
+        loading: false,
+        running: false,
+        error: action.payload,
+      };
+
+    case APP_PICKSORT_STOP:
+      return {
+        ...state,
+        loading: true,
+      };
+
+    case APP_PICKSORT_STOP_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        running: false,
+      };
+
+    case APP_PICKSORT_STOP_FAILURE:
+      return {
+        ...state,
+        loading: false,
+        error: action.payload,
+      };
+
+    case APP_PICKSORT_STATUS_SUCCESS:
+      return {
+        ...state,
+        ...action.payload,
+        error: null,
+      };
+
+    case APP_PICKSORT_STATUS_FAILURE:
+      return {
+        ...state,
+        error: action.payload,
+      };
     default:
       return state;
   }

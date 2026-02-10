@@ -3,6 +3,7 @@ import os
 import threading
 from app.schemas.item import AutoPickPlaceStartResponse,AutoPickPlaceStopResponse,AutoPickPlaceStatusResponse,DXFPreviewResponse,DXFDrawRequest,DXFDrawResponse
 from app.Applications.PickAndPlace import AUTO_RESULT, AUTO_RUN, PickAndPlace,StopPickAndPlace
+from app.Applications.PickAndSort import AUTO_RESULT, AUTO_RUN, PickAndSort,StopPickAndSort
 from app.Applications.ReadandDraw import load_dxf,scale_paths_to_a4
 from fastapi import APIRouter, File, HTTPException, UploadFile
 from app.robot.Robot import get_robot
@@ -16,7 +17,7 @@ _DXF_CACHE = {
 }
 
 @router.post("/1-start", response_model=AutoPickPlaceStartResponse)
-def start_auto():
+def start_pick_place():
     PickAndPlace()
     return {
         "success": True,
@@ -25,7 +26,7 @@ def start_auto():
     }
 
 @router.post("/1-stop", response_model=AutoPickPlaceStopResponse)
-def stop_auto():
+def stop_pick_place():
     StopPickAndPlace()
     return {
         "success": True,
@@ -34,7 +35,32 @@ def stop_auto():
     }
 
 @router.get("/1-status", response_model=AutoPickPlaceStatusResponse)
-def auto_status():
+def status_pick_place():
+    return {
+        **AUTO_RESULT,
+        "auto_run": AUTO_RUN,
+    }
+
+@router.post("/2-start", response_model=AutoPickPlaceStartResponse)
+def start_pick_sort():
+    PickAndSort()
+    return {
+        "success": True,
+        "message": "Auto Pick & Sort started",
+        "auto_run": True,
+    }
+
+@router.post("/2-stop", response_model=AutoPickPlaceStopResponse)
+def stop_pick_sort():
+    StopPickAndSort()
+    return {
+        "success": True,
+        "message": "Auto Pick & Sort stopped",
+        "auto_run": False,
+    }
+
+@router.get("/2-status", response_model=AutoPickPlaceStatusResponse)
+def status_pick_sort():
     return {
         **AUTO_RESULT,
         "auto_run": AUTO_RUN,

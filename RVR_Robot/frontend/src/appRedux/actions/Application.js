@@ -5,6 +5,8 @@ import {
   DXF_PREVIEW,
   DXF_DRAW,
   DXF_RESET,
+  APP_PICKSORT_START,
+  APP_PICKSORT_STOP,
 } from "../../constants/ActionType";
 
 export const startAutoPick = () => ({
@@ -31,4 +33,12 @@ export const drawDXF = (params) => ({
 
 export const resetDXF = () => ({
   type: DXF_RESET,
+});
+
+export const startAutoSort = () => ({
+  type: APP_PICKSORT_START,
+});
+
+export const stopAutoSort = () => ({
+  type: APP_PICKSORT_STOP,
 });
