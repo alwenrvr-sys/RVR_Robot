@@ -1,4 +1,4 @@
-import { Button, InputNumber, Checkbox, Divider } from "antd";
+import { Button, InputNumber, Switch, Divider } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getTcp,
@@ -19,6 +19,8 @@ export default function RightSidebar() {
   const { moving, enabled, connected, mode, pose, loading } = useSelector(
     (state) => state.robot,
   );
+  const [simulate, setSimulate] = useState(true);
+  const [zLift, setZLift] = useState(0);
   const isDisabledState = enabled !== 1;
   const [tcp, setTcp] = useState({
     x: null,
@@ -47,7 +49,14 @@ export default function RightSidebar() {
 
   const handleMoveL = () => {
     const pose = [tcp.x, tcp.y, tcp.z, tcp.rx, tcp.ry, tcp.rz];
-    dispatch(moveL(pose));
+
+    dispatch(
+      moveL({
+        pose,
+        simulate,
+        z_lift: simulate ? zLift : 0,
+      }),
+    );
   };
 
   return (
@@ -100,7 +109,29 @@ export default function RightSidebar() {
       </div>
 
       <Divider />
+      {/* ================= OPTIONS ================= */}
+      <h4 className="section-title">Options</h4>
 
+      <div className="robot-field toggle-row">
+        <label>Simulate before move</label>
+        <Switch
+          checked={simulate}
+          onChange={(checked) => setSimulate(checked)}
+        />
+      </div>
+
+      <div className="robot-field">
+        <label>Z lift (mm)</label>
+        <InputNumber
+          size="small"
+          min={0}
+          step={1}
+          value={zLift}
+          disabled={!simulate}
+          onChange={(v) => setZLift(v)}
+        />
+      </div>
+      <Divider />
       {/* ================= MOTION CONTROL ================= */}
       <h4 className="section-title">Motion Control</h4>
 
@@ -127,20 +158,6 @@ export default function RightSidebar() {
       <div className="robot-field">
         <label>TCP Acceleration (mm/s²)</label>
         <InputNumber size="small" min={1} defaultValue={500} />
-      </div>
-
-      <Divider />
-
-      {/* ================= OPTIONS ================= */}
-      <h4 className="section-title">Options</h4>
-
-      <Checkbox defaultChecked>
-        Simulate before move (SimMoveJ if available)
-      </Checkbox>
-
-      <div className="robot-field">
-        <label>Z lift (mm)</label>
-        <InputNumber size="small" defaultValue={80.0} />
       </div>
 
       <Divider />
@@ -200,7 +217,6 @@ export default function RightSidebar() {
           onClick={() => {
             dispatch(setAutoMode());
             dispatch(showNotification("robot", "Automatic Mode"));
-
           }}
         >
           AUTO
@@ -212,7 +228,9 @@ export default function RightSidebar() {
           disabled={!connected || isDisabledState}
           onClick={() => {
             dispatch(setManualMode());
-            dispatch(showNotification("robot", "Manual Mode Now you can able to Drag"));
+            dispatch(
+              showNotification("robot", "Manual Mode Now you can able to Drag"),
+            );
           }}
         >
           MANUAL
@@ -222,7 +240,8 @@ export default function RightSidebar() {
       <Button
         block
         loading={loading}
-        onClick={() =>{ dispatch(pickUnpick());
+        onClick={() => {
+          dispatch(pickUnpick());
         }}
         disabled={!connected || isDisabledState}
       >

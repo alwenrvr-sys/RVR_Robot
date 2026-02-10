@@ -186,21 +186,39 @@ export function* robotSafety() {
 
 function* moveLAsync(action) {
   try {
-    const { pose } = action.payload;
+    const { pose, simulate, z_lift } = action.payload;
+
     if (!Array.isArray(pose) || pose.length !== 6) {
       throw new Error("Pose must be [x,y,z,rx,ry,rz]");
     }
-    const response = yield call(ROBOT_SERVICE.MOVE_L, pose);
+    const request = {
+      pose,
+      simulate: Boolean(simulate),
+      z_lift: simulate ? Number(z_lift || 0) : 0,
+    };
+    const response = yield call(ROBOT_SERVICE.MOVE_L, request);
     yield put({
       type: ROBOT_MOVEL_SUCCESS,
-      payload: response.data,
+      payload: {
+        pose,
+        simulate: request.simulate,
+        z_lift: request.z_lift,
+        response: response.data,
+      },
     });
+
     yield put(
-      showNotification("robot", `(MoveL) Moving to → ${formatPose(pose)}`),
+      showNotification(
+        "robot",
+        request.simulate
+          ? `(MoveL) Simulated + Z-lift ${request.z_lift}mm → ${formatPose(pose)}`
+          : `(MoveL) Direct → ${formatPose(pose)}`,
+      ),
     );
   } catch (error) {
     const message =
       error.response?.data?.detail || error.message || "MoveL failed";
+
     yield put({
       type: ROBOT_MOVEL_FAILURE,
       payload: message,

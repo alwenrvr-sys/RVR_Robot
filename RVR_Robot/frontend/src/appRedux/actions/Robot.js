@@ -20,7 +20,7 @@ import {
   ROBOT_MOVEL,
   ROBOT_MOVEL_SUCCESS,
   ROBOT_MOVEL_FAILURE,
-  ROBOT_PICK_UNPICK
+  ROBOT_PICK_UNPICK,
 } from "../../constants/ActionType";
 
 export const getTcp = () => ({
@@ -105,9 +105,9 @@ export const robotSafetyFailure = (error) => ({
   payload: error,
 });
 
-export const moveL = (pose) => ({
+export const moveL = (data) => ({
   type: ROBOT_MOVEL,
-  payload: { pose }, // [x,y,z,rx,ry,rz]
+  payload: data,
 });
 
 export const moveLSuccess = (data) => ({

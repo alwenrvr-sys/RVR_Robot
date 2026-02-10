@@ -66,7 +66,9 @@ class MotionParams(BaseModel):
     ovl: Optional[float]
 
 class MoveLRequest(BaseModel):
-    pose: List[float]  # [x, y, z, rx, ry, rz]
+    pose: List[float]         
+    simulate: bool = True     
+    z_lift: float = 0.0 
 
 class DetectedObject(BaseModel):
     id: int

@@ -4,10 +4,9 @@ import time
 
 ROBOT_IP = "192.168.58.2"
 
-MOVE_VEL = 50   
-MOVE_ACC = 10    
+MOVE_VEL = 80   
+MOVE_ACC = 50    
 OVL = 100.0       
-SAFE_Z_LIFT = 80
 
 class RobotService:
     def __init__(self):
@@ -223,7 +222,7 @@ class RobotService:
                 sim_flag                        # simFlag
             )
             
-    def move_to_pose_l(self, target_pose, simulate=True):
+    def move_to_pose_l(self, target_pose,z_lift=0.0, simulate=True):
         try:
             if len(target_pose) != 6:
                 raise ValueError("target_pose must be [x,y,z,rx,ry,rz]")
@@ -235,7 +234,7 @@ class RobotService:
 
             # ---- Build Z-lift waypoint C ----
             via_pose = list(target_pose)
-            via_pose[2] += SAFE_Z_LIFT
+            via_pose[2] += float(z_lift)
 
             # ---- IK reachability check ----
             ret_c, joints_c = self.ik(via_pose)
@@ -267,7 +266,7 @@ class RobotService:
                 "A": cur_pose,
                 "C": via_pose,
                 "B": target_pose,
-                "z_lift": SAFE_Z_LIFT,
+                "z_lift": z_lift,
                 "joints": {
                     "C": joints_c,
                     "B": joints_b,

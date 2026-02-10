@@ -145,18 +145,40 @@ def move_l(req: MoveLRequest):
         if len(req.pose) != 6:
             raise ValueError("pose must have 6 values [x,y,z,rx,ry,rz]")
 
-        error = robot.move_l(req.pose)
-        if error != 0:
-            raise RuntimeError(f"MoveL failed with error code: {error}")
+        # ---------- CASE 1: Simulate + Z-lift ----------
+        if req.simulate:
+            result = robot.move_to_pose_l(
+                target_pose=req.pose,
+                z_lift=req.z_lift,
+                simulate=True
+            )
 
-        return {
-            "status": "ok",
-            "motion": "MoveL",
-            "pose": req.pose
-        }
+            if not result.get("success"):
+                raise RuntimeError(result.get("error", "MoveL simulation failed"))
+
+            return {
+                "status": "ok",
+                "motion": "MoveL",
+                "mode": "SIMULATED",
+                "data": result
+            }
+
+        # ---------- CASE 2: Direct MoveL ----------
+        else:
+            err = robot.move_l(req.pose)
+            if err != 0:
+                raise RuntimeError(f"MoveL failed with error code: {err}")
+
+            return {
+                "status": "ok",
+                "motion": "MoveL",
+                "mode": "DIRECT",
+                "pose": req.pose
+            }
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 #--------------INSTALL-ANGLE------------
 @router.get("/install-angle", response_model=RobotInstallAngle)

@@ -40,14 +40,10 @@ const resetErrors = async () => {
   return axios.get(HOST + ROBOT_API.RESET);
 };
 
-const moveL = async (pose) => {
-  return axios.post(
-    HOST + ROBOT_API.MOVEL,
-    { pose },
-    {
-      headers: { "Content-Type": "application/json" },
-    },
-  );
+const moveL = async (data) => {
+  return axios.post(HOST + ROBOT_API.MOVEL, data, {
+    headers: { "Content-Type": "application/json" },
+  });
 };
 
 const pickUnpick = async () => {

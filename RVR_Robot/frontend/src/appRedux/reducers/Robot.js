@@ -109,7 +109,7 @@ const Robot = (state = initialState, action) => {
       return {
         ...state,
         moving: false,
-        lastPose: action.payload.pose,
+        lastPose: action.payload?.pose ?? state.lastPose,
       };
 
     case ROBOT_MOVEL_FAILURE:
@@ -139,7 +139,7 @@ const Robot = (state = initialState, action) => {
         loading: false,
         error: action.payload,
       };
-      
+
     default:
       return state;
   }
