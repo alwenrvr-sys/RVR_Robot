@@ -10,6 +10,9 @@ import {
   RUN_AUTOSETUP,
   RUN_AUTOSETUP_SUCCESS,
   RUN_AUTOSETUP_FAILURE,
+  GET_CAMERA_PING,
+  GET_CAMERA_PING_SUCCESS,
+  GET_CAMERA_PING_FAILURE,
 } from "../../constants/ActionType";
 
 const initialState = {
@@ -18,10 +21,28 @@ const initialState = {
   result: null,
   analyzeResult: null,
   error: null,
+  connected:false,
 };
 
 const Camera = (state = initialState, action) => {
   switch (action.type) {
+    case GET_CAMERA_PING:
+      return { ...state, loading: true };
+
+    case GET_CAMERA_PING_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        connected: action.payload,
+      };
+
+    case GET_CAMERA_PING_FAILURE:
+      return {
+        ...state,
+        loading: false,
+        connected: false,
+        error: action.payload,
+      };
     case CAMERA_TRIGGER:
       return {
         ...state,
@@ -77,7 +98,11 @@ const Camera = (state = initialState, action) => {
 
     case RESET_ANALYSIS:
       return {
-        ...initialState,
+        ...state,
+        loading: false,
+        result: null,
+        analyzeResult: null,
+        error: null,
       };
 
     case RUN_AUTOSETUP:

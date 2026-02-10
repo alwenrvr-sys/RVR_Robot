@@ -40,6 +40,30 @@ export default function ImageOverlay({ imgRef }) {
   }, [rawResult]);
 
   useEffect(() => {
+    const drawnLabels = [];
+
+    function placeLabel(x, y, w, h) {
+      let ly = y;
+
+      let collision = true;
+      while (collision) {
+        collision = false;
+        for (const r of drawnLabels) {
+          const overlap =
+            x < r.x + r.w && x + w > r.x && ly < r.y + r.h && ly + h > r.y;
+
+          if (overlap) {
+            ly -= h + 4; // push up
+            collision = true;
+            break;
+          }
+        }
+      }
+
+      drawnLabels.push({ x, y: ly, w, h });
+      return ly;
+    }
+
     if (
       !imgRef.current ||
       !canvasRef.current ||
@@ -63,8 +87,7 @@ export default function ImageOverlay({ imgRef }) {
 
     /* ===== STATIC CENTER (draw once) ===== */
     const staticCenter =
-      analyzeResult.objects[0]?.static_center_px ??
-      rawResult?.static_center_px;
+      analyzeResult.objects[0]?.static_center_px ?? rawResult?.static_center_px;
 
     if (staticCenter) {
       const [x, y] = S(staticCenter);
@@ -91,24 +114,6 @@ export default function ImageOverlay({ imgRef }) {
         ctx.fill();
       }
 
-      /* ID label */
-      if (obj.center_px) {
-        const [x, y] = S(obj.center_px);
-        const label = `${idx + 1}`;
-
-        ctx.font = "bold 12px sans-serif";
-        const w = ctx.measureText(label).width + 8;
-
-        ctx.fillStyle = "rgba(0,0,0,0.7)";
-        ctx.fillRect(x + 8, y - 22, w, 16);
-
-        ctx.strokeStyle = "white";
-        ctx.strokeRect(x + 8, y - 22, w, 16);
-
-        ctx.fillStyle = "white";
-        ctx.fillText(label, x + 12, y - 10);
-      }
-
       /* contour */
       if (obj.contour_px) {
         ctx.strokeStyle = "lime";
@@ -122,8 +127,8 @@ export default function ImageOverlay({ imgRef }) {
         ctx.stroke();
       }
 
-      /* bounding box */
-      if (obj.box_px) {
+      /* bounding box (skip for circles) */
+      if (obj.box_px && !obj.inspection?.circles?.length) {
         ctx.strokeStyle = "blue";
         ctx.lineWidth = 2;
         ctx.beginPath();
@@ -156,24 +161,57 @@ export default function ImageOverlay({ imgRef }) {
           ctx.fillText(
             `${obj.inspection.edges_mm[i].toFixed(1)} mm`,
             mx + 4,
-            my - 4
+            my - 4,
           );
         });
       }
 
       /* holes */
-      if (obj.inspection?.holes) {
+      /* circles */
+      if (obj.inspection?.circles?.length) {
         ctx.strokeStyle = "cyan";
         ctx.fillStyle = "cyan";
         ctx.font = "12px monospace";
 
-        obj.inspection.holes.forEach((h) => {
-          const [x, y] = S(h.center_px);
+        obj.inspection.circles.forEach((c) => {
+          const [cx, cy] = S(c.center_px);
+
+          // draw circle
           ctx.beginPath();
-          ctx.arc(x, y, 5, 0, Math.PI * 2);
+          ctx.arc(cx, cy, c.radius_px * scaleX, 0, Math.PI * 2);
           ctx.stroke();
-          ctx.fillText(`Ø ${h.diameter_mm.toFixed(2)} mm`, x + 8, y);
+
+          // center dot
+          ctx.beginPath();
+          ctx.arc(cx, cy, 3, 0, Math.PI * 2);
+          ctx.fill();
+
+          // label
+          ctx.fillText(`Ø ${c.diameter_mm.toFixed(2)} mm`, cx + 8, cy - 6);
         });
+      }
+
+      /* ID label (NO OVERLAP) */
+      if (obj.center_px) {
+        const [x, y] = S(obj.center_px);
+        const label = `${idx + 1}`;
+
+        ctx.font = "bold 12px sans-serif";
+        const w = ctx.measureText(label).width + 8;
+        const h = 16;
+
+        const lx = x + 8;
+        const ly = placeLabel(lx, y - 22, w, h);
+
+        ctx.fillStyle = "rgba(0,0,0,0.75)";
+        ctx.fillRect(lx, ly, w, h);
+
+        ctx.strokeStyle = "white";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(lx, ly, w, h);
+
+        ctx.fillStyle = "white";
+        ctx.fillText(label, lx + 4, ly + 12);
       }
     });
   }, [analyzeResult, rawResult, imgRef]);

@@ -23,6 +23,10 @@ async def get_camera() -> SickCamera:
         await asyncio.to_thread(_camera.connect)
     return _camera
 
+async def ping_camera() -> bool:
+    camera = await get_camera()
+    return await asyncio.to_thread(camera.ping)
+
 def get_latest_image_path(directory: str) -> Optional[str]:
     files = [
         os.path.join(directory, f)

@@ -11,11 +11,17 @@ from app.schemas.item import (
     AnalyzeImageResponse,
     AllAnalyzeImageResponse
 )
-from app.robot.Camera_service import trigger_camera,run_camera_autosetup
+from app.robot.Camera_service import trigger_camera,run_camera_autosetup,ping_camera
 from app.robot.Helpers import analyze_image,sort_analyze_image
 
 router = APIRouter(prefix="/camera", tags=["Camera"])
 
+@router.get("/ping")
+async def camera_ping():
+    ok = await ping_camera()
+    return {
+        "connected": ok
+    }
 
 @router.post(
     "/trigger",

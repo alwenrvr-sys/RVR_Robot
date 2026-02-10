@@ -37,6 +37,35 @@ class SickCamera:
                 break
 
         return data.replace(STX, b"").replace(ETX, b"")
+    
+    def ping(self, timeout: float = 1.0) -> bool:
+        """
+        Ping camera using Command Channel 'echo'.
+        Returns True if camera is reachable and responsive.
+        """
+        if not self.sock:
+            return False
+
+        try:
+            self.sock.settimeout(timeout)
+
+            msg = STX + b'echo "ping"' + ETX
+            self.sock.sendall(msg)
+
+            data = b""
+            while True:
+                chunk = self.sock.recv(4096)
+                data += chunk
+                if ETX in chunk:
+                    break
+
+            # Remove framing
+            reply = data.replace(STX, b"").replace(ETX, b"")
+
+            return reply.strip() == b"ping"
+
+        except Exception:
+            return False
 
     def trigger_with_autosetup(self, current_z: float):
         """

@@ -1,6 +1,6 @@
 import { all, fork } from "redux-saga/effects";
 import { getUser } from "./Auth";
-import { triggerCamera, analyzeImage, runAutosetup } from "./Camera";
+import { triggerCamera, analyzeImage, runAutosetup ,getCameraPing} from "./Camera";
 import {
   getRobotPing,
   getTcp,
@@ -14,6 +14,7 @@ import { AppPickandPlace, DXF } from "./Application";
 export default function* rootSaga() {
   yield all([
     fork(getUser),
+    fork(getCameraPing),
     fork(triggerCamera),
     fork(runAutosetup),
     fork(getTcp),

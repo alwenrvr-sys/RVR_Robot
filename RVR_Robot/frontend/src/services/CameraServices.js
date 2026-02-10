@@ -4,6 +4,12 @@ import { APICONFIG } from "../config/ApiConfig";
 const HOST = APICONFIG.HOST;
 const CAMERA_API = APICONFIG.CAMERA;
 
+const pingCamera = async () => {
+  return axios.get(HOST + CAMERA_API.PING, {
+    withCredentials: true,
+  });
+};
+
 const triggerCamera = async (currentZ) => {
   try {
     const response = await axios.post(
@@ -37,6 +43,7 @@ const runAutosetup = () =>
   );
 
 export const CAMERA_SERVICE = {
+  PING:pingCamera,
   CAMERA_TRIGGER: triggerCamera,
   ANALYZE: analyzeImage,
   AUTOSETUP:runAutosetup,

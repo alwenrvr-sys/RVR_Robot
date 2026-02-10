@@ -24,7 +24,7 @@ export default function LeftSidebarPick({ onModeChange }) {
   const { image_base64, running } = useSelector((state) => state.app);
   const [zValue, setZValue] = useState(null);
   const isAuto = running;
-  const uiLocked = autosetupLoading || isAuto;
+  const uiLocked = autosetupLoading;
   const [imageParams, setImageParams] = useState({
     blur: 5,
     minArea: 10,
@@ -121,14 +121,14 @@ export default function LeftSidebarPick({ onModeChange }) {
       {/* ================= ACTIONS ================= */}
       <h4 className="section-title">Pick & Place</h4>
 
-      <Button block onClick={handleUploadImage}>
+      <Button block disabled={isAuto} onClick={handleUploadImage}>
         Upload Photo
       </Button>
 
       <Button
         block
         loading={autosetupLoading}
-        disabled={uiLocked}
+        disabled={isAuto || uiLocked}
         onClick={() => dispatch(runAutosetup())}
       >
         Run AutoSetup

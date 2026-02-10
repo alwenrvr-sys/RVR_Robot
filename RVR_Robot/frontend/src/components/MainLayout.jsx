@@ -17,6 +17,8 @@ import {
   LogoutOutlined,
 } from "@ant-design/icons";
 import { RobotPing, enableRobot, setAutoMode } from "../appRedux/actions/Robot";
+import { CameraPing } from "../appRedux/actions/Camera";
+import { hideNotification } from "../appRedux/actions/Notify";
 
 const { Header, Content } = Layout;
 
@@ -26,26 +28,50 @@ export default function MainLayout() {
   const dispatch = useDispatch();
   const [profileOpen, setProfileOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-
-  const { connected, enabled, mode } = useSelector((state) => state.robot);
+  const { connected: robotConnected } = useSelector((state) => state.robot);
+  const [closing, setClosing] = useState(false);
+  const { connected: cameraConnected } = useSelector((state) => state.camera);
+  const notify = useSelector((state) => state.notify);
 
   useEffect(() => {
     dispatch(RobotPing());
   }, [dispatch]);
 
   useEffect(() => {
-    if (!connected) return;
+    dispatch(CameraPing());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (!robotConnected) return;
     if (initializedRef.current) return;
 
     initializedRef.current = true;
 
     dispatch(enableRobot());
     dispatch(setAutoMode());
-  }, [connected, dispatch]);
+  }, [robotConnected, dispatch]);
+
+  useEffect(() => {
+    if (!notify.visible) return;
+
+    setClosing(false);
+
+    const t = setTimeout(() => {
+      setClosing(true);
+    }, 2000);
+
+    const cleanup = setTimeout(() => {
+      dispatch(hideNotification());
+    }, 2500);
+
+    return () => {
+      clearTimeout(t);
+      clearTimeout(cleanup);
+    };
+  }, [notify.visible, dispatch]);
 
   return (
     <Layout style={{ height: "100vh", overflow: "hidden" }}>
-      {/* ================= TOP BAR ================= */}
       <Header
         style={{
           position: "fixed",
@@ -90,18 +116,42 @@ export default function MainLayout() {
         <div
           style={{
             position: "absolute",
-            top: 14,
+            top: 9,
             left: "50%",
             transform: "translateX(-50%)",
             display: "flex",
             justifyContent: "center",
             gap: 160,
             pointerEvents: "auto",
-            zIndex: 1000,
+            zIndex: 1001,
           }}
         >
-          <IconStatus icon={<RobotOutlined />} connected={connected} />
-          <IconStatus icon={<CameraOutlined />} connected />
+          <div className="status-wrapper robot">
+            {notify.visible && notify.tag === "robot" && (
+              <div className={`status-notify robot ${closing ? "out" : "in"}`}>
+                {notify.message}
+              </div>
+            )}
+
+            <div className="status-icon">
+              <IconStatus icon={<RobotOutlined />} connected={robotConnected} />
+            </div>
+          </div>
+
+          <div className="status-wrapper camera">
+            {notify.visible && notify.tag === "camera" && (
+              <div className={`status-notify camera ${closing ? "out" : "in"}`}>
+                {notify.message}
+              </div>
+            )}
+
+            <div className="status-icon">
+              <IconStatus
+                icon={<CameraOutlined />}
+                connected={cameraConnected}
+              />
+            </div>
+          </div>
         </div>
         {/* Center Icon Menu */}
         <div
@@ -201,7 +251,6 @@ export default function MainLayout() {
           )}
         </div>
       </Header>
-
       {/* ================= MENU DRAWER (UNDER TOP BAR) ================= */}
       <div
         onMouseLeave={() => setMenuOpen(false)}
@@ -252,7 +301,6 @@ export default function MainLayout() {
           onClick={() => navigate("/ml-teach")}
         />
       </div>
-
       {/* ================= CONTENT ================= */}
       <Content
         style={{
@@ -303,16 +351,16 @@ function IconStatus({ icon, connected }) {
     >
       <div
         style={{
-          width: 30,
-          height: 30,
+          width: 40,
+          height: 40,
           borderRadius: "50%",
-          background: "#020202",
+          background: "black",
           border: `2px solid ${connected ? "#52c41a" : "#ff4d4f"}`,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           color: connected ? "#52c41a" : "#ff4d4f",
-          fontSize: 14,
+          fontSize: 20,
         }}
       >
         {icon}

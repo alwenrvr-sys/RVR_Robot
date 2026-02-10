@@ -824,6 +824,140 @@ body,
   flex-direction: column;
 
   flex: 1;
-  min-height: 0; /* 🔴 REQUIRED */
+  min-height: 0;
   overflow: hidden;
+}
+/* ================= BASE NOTIFICATION ================= */
+.status-wrapper {
+  position: relative;
+  width: 40px;
+  height: 40px;
+}
+
+.status-wrapper > .status-icon {
+  position: relative;
+  z-index: 2;
+}
+
+.status-notify {
+  position: absolute;
+  top: 7px;
+
+  padding: 6px 16px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+
+  background: #f5f5f5;
+  color: black;
+
+  pointer-events: none; /* allow icon hover/click */
+  z-index: 1; /* behind the icon */
+
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+/* ================= ROBOT (LEFT ICON) ================= */
+.status-notify.robot {
+  right: 6px; /* start at icon edge */
+  top: 50%;
+  transform: translateY(-50%);
+  border-radius: 999px 0 0 999px;
+
+  animation: slideOutLeft 0.25s ease-out forwards;
+}
+
+/* ================= CAMERA (RIGHT ICON) ================= */
+/* round on LEFT, flat on RIGHT */
+.status-notify.camera {
+  left: 6px; /* start at icon edge */
+  top: 50%;
+  transform: translateY(-50%);
+  border-radius: 0 999px 999px 0;
+
+  animation: slideOutRight 0.25s ease-out forwards;
+}
+
+/* ================= ANIMATIONS ================= */
+
+@keyframes slideOutLeft {
+  from {
+    opacity: 0;
+    transform: translate(0, -50%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-28px, -50%);
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    opacity: 0;
+    transform: translate(0, -50%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(28px, -50%);
+  }
+}
+
+.status-notify.camera.in {
+  animation: slideInRight 0.25s ease-out forwards;
+}
+
+.status-notify.camera.out {
+  animation: slideOutRight 0.25s ease-in forwards;
+}
+
+.status-notify.robot.in {
+  animation: slideInLeft 0.25s ease-out forwards;
+}
+
+.status-notify.robot.out {
+  animation: slideOutLeft 0.25s ease-in forwards;
+}
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translate(0, -50%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(28px, -50%);
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    opacity: 1;
+    transform: translate(28px, -50%);
+  }
+  to {
+    opacity: 0;
+    transform: translate(0, -50%);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translate(0, -50%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-28px, -50%);
+  }
+}
+
+@keyframes slideOutLeft {
+  from {
+    opacity: 1;
+    transform: translate(-28px, -50%);
+  }
+  to {
+    opacity: 0;
+    transform: translate(0, -50%);
+  }
 }

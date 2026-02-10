@@ -5,9 +5,25 @@ import {
   ANALYZE_IMAGE,
   ANALYZE_IMAGE_SUCCESS,
   ANALYZE_IMAGE_FAILURE,
-  CAMERA_LOCAL_IMAGE,
-  RUN_AUTOSETUP
+  RUN_AUTOSETUP,
+  GET_CAMERA_PING,
+  GET_CAMERA_PING_SUCCESS,
+  GET_CAMERA_PING_FAILURE
 } from "../../constants/ActionType";
+
+export const CameraPing = () => ({
+  type: GET_CAMERA_PING,
+});
+
+export const CameraPingSuccess = (connected) => ({
+  type: GET_CAMERA_PING_SUCCESS,
+  payload: connected,
+});
+
+export const CameraPingFailure = (error) => ({
+  type: GET_CAMERA_PING_FAILURE,
+  payload: error,
+});
 
 export const triggerCamera = (currentZ) => ({
   type: CAMERA_TRIGGER,

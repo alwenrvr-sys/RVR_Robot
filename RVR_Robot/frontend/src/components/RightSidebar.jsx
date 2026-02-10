@@ -9,13 +9,14 @@ import {
   stopRobot,
   resetRobotErrors,
   moveL,
-  pickUnpick
+  pickUnpick,
 } from "../appRedux/actions/Robot";
 import { useEffect, useState } from "react";
+import { showNotification } from "../appRedux/actions/Notify";
 
 export default function RightSidebar() {
   const dispatch = useDispatch();
-  const { moving, enabled, connected, mode, pose,loading } = useSelector(
+  const { moving, enabled, connected, mode, pose, loading } = useSelector(
     (state) => state.robot,
   );
   const isDisabledState = enabled !== 1;
@@ -47,6 +48,7 @@ export default function RightSidebar() {
   const handleMoveL = () => {
     const pose = [tcp.x, tcp.y, tcp.z, tcp.rx, tcp.ry, tcp.rz];
     dispatch(moveL(pose));
+    dispatch(showNotification("robot", "Moving robot"));
   };
 
   return (
@@ -90,7 +92,10 @@ export default function RightSidebar() {
         <Button
           block
           disabled={!connected || isDisabledState}
-          onClick={() => dispatch(getTcp())}
+          onClick={() => {
+            dispatch(getTcp());
+            dispatch(showNotification("robot", "Pose Fetched"));
+          }}
         >
           GET
         </Button>
@@ -150,7 +155,10 @@ export default function RightSidebar() {
           danger
           block
           disabled={!connected || isDisabledState}
-          onClick={() => dispatch(stopRobot())}
+          onClick={() => {
+            dispatch(stopRobot());
+            dispatch(showNotification("robot", "Movement Stoped"));
+          }}
         >
           STOP
         </Button>
@@ -158,7 +166,10 @@ export default function RightSidebar() {
         <Button
           block
           disabled={!connected || isDisabledState}
-          onClick={() => dispatch(resetRobotErrors())}
+          onClick={() => {
+            dispatch(resetRobotErrors());
+            dispatch(showNotification("robot", "Erros Cleared"));
+          }}
         >
           CLEAR ERR
         </Button>
@@ -168,14 +179,20 @@ export default function RightSidebar() {
         <Button
           type={enabled === 1 ? "primary" : "default"}
           block
-          onClick={() => dispatch(enableRobot())}
+          onClick={() => {
+            dispatch(enableRobot());
+            dispatch(showNotification("robot", "Robot Enabled"));
+          }}
         >
           ENABLE
         </Button>
         <Button
           danger={enabled === 0}
           block
-          onClick={() => dispatch(disableRobot())}
+          onClick={() => {
+            dispatch(disableRobot());
+            dispatch(showNotification("robot", "Robot Disabled"));
+          }}
         >
           DISABLE
         </Button>
@@ -186,7 +203,10 @@ export default function RightSidebar() {
           block
           type={mode === 0 ? "primary" : "default"}
           disabled={!connected || isDisabledState}
-          onClick={() => dispatch(setAutoMode())}
+          onClick={() => {
+            dispatch(setAutoMode());
+            dispatch(showNotification("robot", "Auto Mode"));
+          }}
         >
           AUTO
         </Button>
@@ -195,20 +215,25 @@ export default function RightSidebar() {
           block
           type={mode === 1 ? "primary" : "default"}
           disabled={!connected || isDisabledState}
-          onClick={() => dispatch(setManualMode())}
+          onClick={() => {
+            dispatch(setManualMode());
+            dispatch(showNotification("robot", "Manual Mode"));
+          }}
         >
           MANUAL
         </Button>
       </div>
 
       <Button
-          block
-          loading={loading}
-          onClick={() => dispatch(pickUnpick())}
-          disabled={!connected || isDisabledState}
-        >
-          Pick & Place
-        </Button>
+        block
+        loading={loading}
+        onClick={() =>{ dispatch(pickUnpick());
+          dispatch(showNotification("robot","DO Triggered"))
+        }}
+        disabled={!connected || isDisabledState}
+      >
+        Pick & Place
+      </Button>
     </aside>
   );
 }

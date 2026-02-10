@@ -4,10 +4,11 @@ export const APICONFIG = Object.freeze({
     GETUSER: "auth/users",
   },
   CAMERA: {
+    PING: "camera/ping",
     TRIGGER: "camera/trigger",
     AUTOSETUP: "camera/autosetup",
     ANALYZE: "camera/analyze",
-    ALLANALYZE:"camera/all/analyze"
+    ALLANALYZE: "camera/all/analyze",
   },
   ROBOT: {
     TCP: "robot/tcp",

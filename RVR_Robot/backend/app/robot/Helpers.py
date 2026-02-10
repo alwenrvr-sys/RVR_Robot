@@ -106,6 +106,48 @@ def detect_holes_from_hierarchy(contours, hierarchy, sx, sy):
         })
     return holes
 
+def detect_circles_from_contours(
+    contours,
+    sx: float,
+    sy: float,
+    min_area: int = 300,
+    min_radius_px: float = 5.0,
+    circularity_thresh: float = 0.75
+):
+    circles = []
+    scale = (sx + sy) / 2.0
+
+    for c in contours:
+        area = cv2.contourArea(c)
+        if area < min_area:
+            continue
+
+        peri = cv2.arcLength(c, True)
+        if peri < 20:
+            continue
+
+        # circularity test
+        circularity = 4.0 * math.pi * area / (peri * peri)
+        if circularity < circularity_thresh:
+            continue
+
+        # enclosing circle
+        (x, y), r_px = cv2.minEnclosingCircle(c)
+        if r_px < min_radius_px:
+            continue
+
+        r_mm = r_px / scale
+
+        circles.append({
+            "center_px": (int(x), int(y)),
+            "radius_px": float(r_px),
+            "radius_mm": float(r_mm),
+            "diameter_mm": float(2.0 * r_mm)
+        })
+
+    return circles
+
+
 def get_child_contours(parent_contour, contours, hierarchy):
     children = []
     parent_idx = None
@@ -149,7 +191,6 @@ def filter_object_contours(contours, min_area=2000):
             objs.append(c)
     return objs
 
-
 def ocr_read_text_and_numbers(
     bgr: np.ndarray,
     roi=None
@@ -164,7 +205,6 @@ def ocr_read_text_and_numbers(
     config = "--psm 6 -c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.-"
     text = pytesseract.image_to_string(gray, config=config)
     return text.strip(), gray
-
 
 def analyze_image(
     bgr: np.ndarray,
@@ -250,8 +290,10 @@ def analyze_image(
 
     if enable_edges:
         measurements, approx_edges, _ = measure_edges_and_holes(contours, sx, sy)
-        holes = detect_holes_from_hierarchy(contours, hierarchy, sx, sy)
-        measurements["holes"] = holes
+        # holes = detect_holes_from_hierarchy(contours, hierarchy, sx, sy)
+        # measurements["holes"] = holes
+        circles = detect_circles_from_contours(contours, sx, sy)
+        measurements["circles"] = circles
         result["inspection"] = measurements
         result["edges_px"] = approx_edges.reshape(-1, 2).astype(int).tolist()
 
@@ -261,6 +303,78 @@ def analyze_image(
     #     result["ocr"] = text
 
     return result
+
+def detect_circles_from_contours(
+    contours,
+    sx: float,
+    sy: float,
+    min_area: int = 300,
+    min_radius_px: float = 5.0,
+    circularity_thresh: float = 0.75
+):
+    circles = []
+    scale = (sx + sy) / 2.0
+
+    for c in contours:
+        area = cv2.contourArea(c)
+        if area < min_area:
+            continue
+
+        peri = cv2.arcLength(c, True)
+        if peri < 20:
+            continue
+
+        circularity = 4 * math.pi * area / (peri * peri)
+        if circularity < circularity_thresh:
+            continue
+
+        (x, y), r_px = cv2.minEnclosingCircle(c)
+        if r_px < min_radius_px:
+            continue
+
+        r_mm = r_px / scale
+
+        circles.append({
+            "center_px": (int(x), int(y)),
+            "radius_px": float(r_px),
+            "radius_mm": float(r_mm),
+            "diameter_mm": float(2 * r_mm),
+        })
+
+    return circles
+
+def contour_is_circle(contour, min_circularity=0.75):
+    area = cv2.contourArea(contour)
+    if area < 300:
+        return False
+
+    peri = cv2.arcLength(contour, True)
+    if peri == 0:
+        return False
+
+    circularity = 4 * math.pi * area / (peri * peri)
+    return circularity >= min_circularity
+
+def deduplicate_circles(circles, center_tol_px=10, radius_tol_px=10):
+    unique = []
+
+    for c in circles:
+        keep = True
+        for u in unique:
+            dc = math.hypot(
+                c["center_px"][0] - u["center_px"][0],
+                c["center_px"][1] - u["center_px"][1],
+            )
+            dr = abs(c["radius_px"] - u["radius_px"])
+
+            if dc < center_tol_px and dr < radius_tol_px:
+                keep = False
+                break
+
+        if keep:
+            unique.append(c)
+
+    return unique
 
 def sort_analyze_image(
     bgr: np.ndarray,
@@ -363,40 +477,58 @@ def sort_analyze_image(
 
         # ------------------ INSPECTION ------------------
         if enable_edges:
-            # measure edges for THIS object only
-            measurements, approx_edges, _ = measure_edges_and_holes(
-                [subject], sx, sy
-            )
-
-            # detect holes INSIDE this object only
             child_contours = get_child_contours(subject, contours, hierarchy)
 
-            holes = []
-            for c in child_contours:
-                area = cv2.contourArea(c)
-                if area < 300:
-                    continue
+            measurements = {}
+            circles = []
 
-                peri = cv2.arcLength(c, True)
-                if peri < 20:
-                    continue
-
-                circularity = 4 * math.pi * area / (peri * peri)
-                if circularity < 0.6:
-                    continue
-
-                (x, y), r_px = cv2.minEnclosingCircle(c)
+            # ===============================
+            # CASE 1: OBJECT ITSELF IS CIRCLE
+            # ===============================
+            if contour_is_circle(subject):
+                (x, y), r_px = cv2.minEnclosingCircle(subject)
                 r_mm = r_px / ((sx + sy) / 2)
 
-                holes.append({
-                    "center_px": (int(x), int(y)),
-                    "diameter_mm": 2 * r_mm
+                circles.append({
+                    "center_px": [int(x), int(y)],
+                    "radius_px": float(r_px),
+                    "radius_mm": float(r_mm),
+                    "diameter_mm": float(2 * r_mm),
                 })
 
-            measurements["holes"] = holes
-            obj_result["inspection"] = measurements
-            obj_result["edges_px"] = approx_edges.reshape(-1, 2).astype(int).tolist()
+                # ❌ DO NOT compute edges
+                measurements["circles"] = circles
+                obj_result["inspection"] = measurements
 
+            # ==================================
+            # CASE 2: NON-CIRCULAR OBJECT
+            # ==================================
+            else:
+                measurements, approx_edges, _ = measure_edges_and_holes(
+                    [subject], sx, sy
+                )
+
+                # detect circular features inside
+                for c in child_contours:
+                    if not contour_is_circle(c):
+                        continue
+
+                    (x, y), r_px = cv2.minEnclosingCircle(c)
+                    r_mm = r_px / ((sx + sy) / 2)
+
+                    circles.append({
+                        "center_px": [int(x), int(y)],
+                        "radius_px": float(r_px),
+                        "radius_mm": float(r_mm),
+                        "diameter_mm": float(2 * r_mm),
+                    })
+
+                circles = deduplicate_circles(circles)
+
+                measurements["circles"] = circles
+                obj_result["inspection"] = measurements
+
+                obj_result["edges_px"] = approx_edges.reshape(-1, 2).astype(int).tolist()
 
         results.append(obj_result)
 
@@ -408,7 +540,6 @@ def sort_analyze_image(
         "count": len(results),
         "objects": results,
     }
-
 
 
 def wait_for_image_ready(path: str, timeout: float = 2.0) -> bool:
