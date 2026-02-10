@@ -11,8 +11,8 @@ import {
   moveL,
   pickUnpick,
 } from "../appRedux/actions/Robot";
-import { useEffect, useState } from "react";
 import { showNotification } from "../appRedux/actions/Notify";
+import { useEffect, useState } from "react";
 
 export default function RightSidebar() {
   const dispatch = useDispatch();
@@ -48,7 +48,6 @@ export default function RightSidebar() {
   const handleMoveL = () => {
     const pose = [tcp.x, tcp.y, tcp.z, tcp.rx, tcp.ry, tcp.rz];
     dispatch(moveL(pose));
-    dispatch(showNotification("robot", "Moving robot"));
   };
 
   return (
@@ -94,7 +93,6 @@ export default function RightSidebar() {
           disabled={!connected || isDisabledState}
           onClick={() => {
             dispatch(getTcp());
-            dispatch(showNotification("robot", "Pose Fetched"));
           }}
         >
           GET
@@ -157,7 +155,6 @@ export default function RightSidebar() {
           disabled={!connected || isDisabledState}
           onClick={() => {
             dispatch(stopRobot());
-            dispatch(showNotification("robot", "Movement Stoped"));
           }}
         >
           STOP
@@ -168,7 +165,6 @@ export default function RightSidebar() {
           disabled={!connected || isDisabledState}
           onClick={() => {
             dispatch(resetRobotErrors());
-            dispatch(showNotification("robot", "Erros Cleared"));
           }}
         >
           CLEAR ERR
@@ -181,7 +177,6 @@ export default function RightSidebar() {
           block
           onClick={() => {
             dispatch(enableRobot());
-            dispatch(showNotification("robot", "Robot Enabled"));
           }}
         >
           ENABLE
@@ -191,7 +186,6 @@ export default function RightSidebar() {
           block
           onClick={() => {
             dispatch(disableRobot());
-            dispatch(showNotification("robot", "Robot Disabled"));
           }}
         >
           DISABLE
@@ -205,7 +199,8 @@ export default function RightSidebar() {
           disabled={!connected || isDisabledState}
           onClick={() => {
             dispatch(setAutoMode());
-            dispatch(showNotification("robot", "Auto Mode"));
+            dispatch(showNotification("robot", "Automatic Mode"));
+
           }}
         >
           AUTO
@@ -217,7 +212,7 @@ export default function RightSidebar() {
           disabled={!connected || isDisabledState}
           onClick={() => {
             dispatch(setManualMode());
-            dispatch(showNotification("robot", "Manual Mode"));
+            dispatch(showNotification("robot", "Manual Mode Now you can able to Drag"));
           }}
         >
           MANUAL
@@ -228,7 +223,6 @@ export default function RightSidebar() {
         block
         loading={loading}
         onClick={() =>{ dispatch(pickUnpick());
-          dispatch(showNotification("robot","DO Triggered"))
         }}
         disabled={!connected || isDisabledState}
       >

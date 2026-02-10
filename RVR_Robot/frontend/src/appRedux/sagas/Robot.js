@@ -25,16 +25,22 @@ import {
   ROBOT_PICK_UNPICK_SUCCESS,
   ROBOT_PICK_UNPICK_FAILURE,
 } from "../../constants/ActionType";
+import { showNotification } from "../actions/Notify";
 import { ROBOT_SERVICE } from "../../services/RobotServices";
+
+const formatPose = (pose) => {
+  const [x, y, z, rz] = pose;
+  return `X=${x.toFixed(1)} Y=${y.toFixed(1)} Z=${z.toFixed(1)} RZ=${rz.toFixed(1)}`;
+};
 
 function* getTcpAsync() {
   try {
     const response = yield call(ROBOT_SERVICE.GET_TCP);
-
     yield put({
       type: GET_TCP_SUCCESS,
       payload: response.data,
     });
+    yield put(showNotification("robot", "Robot Current Pose Fetched"));
   } catch (error) {
     yield put({
       type: GET_TCP_FAILURE,
@@ -55,6 +61,7 @@ function* getRobotPingAsync() {
       type: GET_ROBOT_PING_SUCCESS,
       payload: response.data.connected,
     });
+    yield put(showNotification("robot", "Robot Connected"));
   } catch (error) {
     yield put({
       type: GET_ROBOT_PING_FAILURE,
@@ -85,9 +92,10 @@ function* setAutoModeAsync() {
 function* setManualModeAsync() {
   try {
     const response = yield call(ROBOT_SERVICE.SET_MANUAL_MODE);
+    const value = response.data.value;
     yield put({
       type: ROBOT_MODE_SUCCESS,
-      payload: response.data.value, // 1
+      payload: value, // 1
     });
   } catch (error) {
     yield put({
@@ -109,6 +117,7 @@ function* enableRobotAsync() {
       type: ROBOT_ENABLE_SUCCESS,
       payload: response.data.value, // 1
     });
+    yield put(showNotification("robot", "Robot Enabled :)"));
   } catch (error) {
     yield put({
       type: ROBOT_ENABLE_FAILURE,
@@ -124,6 +133,7 @@ function* disableRobotAsync() {
       type: ROBOT_ENABLE_SUCCESS,
       payload: response.data.value, // 0
     });
+    yield put(showNotification("robot", "Robot Disabled :("));
   } catch (error) {
     yield put({
       type: ROBOT_ENABLE_FAILURE,
@@ -144,6 +154,7 @@ function* stopRobotAsync() {
       type: ROBOT_SAFETY_SUCCESS,
       payload: response.data.action, // "STOP"
     });
+    yield put(showNotification("robot", "Robot Movement Stoped"));
   } catch (error) {
     yield put({
       type: ROBOT_SAFETY_FAILURE,
@@ -159,6 +170,7 @@ function* resetErrorsAsync() {
       type: ROBOT_SAFETY_SUCCESS,
       payload: response.data.action, // "ERRORS RESET"
     });
+    yield put(showNotification("robot", "Robot Errors Cleared"));
   } catch (error) {
     yield put({
       type: ROBOT_SAFETY_FAILURE,
@@ -178,18 +190,23 @@ function* moveLAsync(action) {
     if (!Array.isArray(pose) || pose.length !== 6) {
       throw new Error("Pose must be [x,y,z,rx,ry,rz]");
     }
-
     const response = yield call(ROBOT_SERVICE.MOVE_L, pose);
-
     yield put({
       type: ROBOT_MOVEL_SUCCESS,
       payload: response.data,
     });
+    yield put(
+      showNotification("robot", `(MoveL) Moving to → ${formatPose(pose)}`),
+    );
   } catch (error) {
+    const message =
+      error.response?.data?.detail || error.message || "MoveL failed";
     yield put({
       type: ROBOT_MOVEL_FAILURE,
-      payload: error.response?.data?.detail || error.message,
+      payload: message,
     });
+
+    yield put(showNotification("robot", message));
   }
 }
 
@@ -205,6 +222,12 @@ function* pickUnpickAsync() {
       type: ROBOT_PICK_UNPICK_SUCCESS,
       payload: response.data,
     });
+    const value = response.data.current;
+    if (value === 1) {
+      yield put(showNotification("robot", "Object Picked"));
+    } else {
+      yield put(showNotification("robot", "Object Placed"));
+    }
   } catch (error) {
     yield put({
       type: ROBOT_PICK_UNPICK_FAILURE,
