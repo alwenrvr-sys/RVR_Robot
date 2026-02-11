@@ -37,7 +37,7 @@ export default function Joystick() {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    zIndex: 20,
+                    zIndex: 2,
                     borderRadius: 12,
                   }}
                 >
