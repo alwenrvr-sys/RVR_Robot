@@ -7,6 +7,7 @@ import {
   DXF_RESET,
   APP_PICKSORT_START,
   APP_PICKSORT_STOP,
+  SET_PRIORITY_ORDER
 } from "../../constants/ActionType";
 
 export const startAutoPick = () => ({
@@ -41,4 +42,9 @@ export const startAutoSort = () => ({
 
 export const stopAutoSort = () => ({
   type: APP_PICKSORT_STOP,
+});
+
+export const setPriorityOrder = (order) => ({
+  type: SET_PRIORITY_ORDER,
+  payload: order,
 });

@@ -170,10 +170,21 @@ def get_child_contours(parent_contour, contours, hierarchy):
 def measure_edges_and_holes(contours, sx: float, sy: float):
     results = {
         "edges_mm": [],
-        "holes": []
+        "width_mm": 0.0,
+        "height_mm": 0.0,
+        "area_mm2": 0.0,
+        "perimeter_mm": 0.0,
     }
     outer = max(contours, key=cv2.contourArea)
-    eps = 0.005 * cv2.arcLength(outer, True)
+    area_px = cv2.contourArea(outer)
+    results["area_mm2"] = area_px / (sx * sy)
+    peri_px = cv2.arcLength(outer, True)
+    results["perimeter_mm"] = peri_px / ((sx + sy) / 2)
+    rect = cv2.minAreaRect(outer)
+    (_, _), (w_px, h_px), _ = rect
+    results["width_mm"] = max(w_px, h_px) / sx
+    results["height_mm"] = min(w_px, h_px) / sy
+    eps = 0.005 * peri_px
     approx = cv2.approxPolyDP(outer, eps, True)
     for i in range(len(approx)):
         p1 = approx[i][0]
@@ -182,7 +193,6 @@ def measure_edges_and_holes(contours, sx: float, sy: float):
         mm_len = px_len / ((sx + sy) / 2)
         results["edges_mm"].append(mm_len)
     return results, approx, outer
-
 
 def filter_object_contours(contours, min_area=2000):
     objs = []
@@ -462,7 +472,6 @@ def sort_analyze_image(
             target_Rz = Rz - theta_rect
 
         obj_result = {
-            "id": idx,
             "center_px": [float(cx), float(cy)],
             "static_center_px": list(static_point_px),
             "contour_px": subject.reshape(-1, 2).astype(int).tolist(),
@@ -535,13 +544,27 @@ def sort_analyze_image(
         results.append(obj_result)
 
     # ------------------ SORT OBJECTS (OPTIONAL) ------------------
-    results.sort(key=lambda o: o["center_px"][0])  # left → right
+    results.sort(key=lambda o: o["center_px"][0])
+
+    # Re-assign ID after sorting
+    for new_id, obj in enumerate(results, start=1):
+        obj["id"] = new_id
+
+    # Only group if inspection data exists
+    objects_with_geometry = [
+        o for o in results
+        if "inspection" in o and "width_mm" in o["inspection"]
+    ]
+
+    groups = group_objects_by_geometry(objects_with_geometry)
 
     return {
         "success": True,
         "count": len(results),
         "objects": results,
+        "groups": groups,
     }
+
 
 
 def wait_for_image_ready(path: str, timeout: float = 2.0) -> bool:
@@ -572,3 +595,79 @@ def get_latest_image_path(
     if not files:
         return None
     return max(files, key=os.path.getmtime)
+
+def group_objects_by_geometry(
+    objects,
+    width_tol=0.08,
+    height_tol=0.08,
+    area_tol=0.12,
+):
+    groups = []
+    group_counter = 0
+
+    for obj in objects:
+
+        width = obj["inspection"]["width_mm"]
+        height = obj["inspection"]["height_mm"]
+        area = obj["inspection"]["area_mm2"]
+
+        placed = False
+
+        for group in groups:
+            ref = group["ref"]
+
+            if (
+                within_tol(width, ref["width"], width_tol)
+                and within_tol(height, ref["height"], height_tol)
+                and within_tol(area, ref["area"], area_tol)
+            ):
+                group["object_ids"].append(obj["id"])
+                placed = True
+                break
+
+        if not placed:
+            group_counter += 1
+            groups.append({
+                "group_id": f"G{group_counter}",
+                "ref": {
+                    "width": width,
+                    "height": height,
+                    "area": area
+                },
+                "object_ids": [obj["id"]]  
+            })
+
+
+    return groups
+
+
+def within_tol(value, reference, tol):
+    if reference == 0:
+        return False
+    return abs(value - reference) <= reference * tol
+
+def set_priority_for_groups(groups, priority_order):
+    """
+    groups: result from group_objects_by_geometry()
+    priority_order: list of group_ids from frontend (e.g. ["G3", "G1", "G2"])
+
+    Returns:
+        Ordered flat list of objects ready for picking
+    """
+
+    # Map group_id → objects
+    group_map = {g["group_id"]: g["objects"] for g in groups}
+
+    ordered_objects = []
+
+    # 1️⃣ Add groups in user-defined priority
+    for gid in priority_order:
+        if gid in group_map:
+            ordered_objects.extend(group_map[gid])
+
+    # 2️⃣ Add remaining groups not mentioned
+    for g in groups:
+        if g["group_id"] not in priority_order:
+            ordered_objects.extend(g["objects"])
+
+    return ordered_objects

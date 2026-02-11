@@ -961,3 +961,7 @@ body,
     transform: translate(0, -50%);
   }
 }
+
+.priority-scroll::-webkit-scrollbar {
+  display: none;   /* Chrome, Safari */
+}

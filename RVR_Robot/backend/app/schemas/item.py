@@ -107,11 +107,22 @@ class AnalyzeImageResponse(BaseModel):
     inspection: Optional[Dict[str, Any]] = None
     ocr: Optional[str] = None
     reason: Optional[str] = None
+    
+class GeometryRef(BaseModel):
+    width: float
+    height: float
+    area: float
 
+class ObjectGroup(BaseModel):
+    group_id: str
+    ref: GeometryRef
+    object_ids: List[int]
+  
 class AllAnalyzeImageResponse(BaseModel):
     success: bool
     count: int
     objects: List[DetectedObject]
+    groups: Optional[List[ObjectGroup]] = None  
     reason: Optional[str] = None
 
 class AutoPickPlaceStartRequest(BaseModel):

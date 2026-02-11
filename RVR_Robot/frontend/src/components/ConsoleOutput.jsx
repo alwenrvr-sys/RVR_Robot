@@ -2,7 +2,7 @@ import { useSelector } from "react-redux";
 
 export default function ConsoleOutput() {
   const { running, stage, analysis, error, previewPaths, mode } = useSelector(
-    (state) => state.app
+    (state) => state.app,
   );
 
   const cameraAnalyze = useSelector((state) => state.camera.analyzeResult);
@@ -65,10 +65,10 @@ Detected objects: ${objects.length}
             Object - {i + 1}
           </span>
           {"\n"}
-          {"  "}Center (px): X={o.center_px?.[0].toFixed(1)}  Y=
+          {"  "}Center (px): X={o.center_px?.[0].toFixed(1)} Y=
           {o.center_px?.[1].toFixed(1)}
           {"\n"}
-          {"  "}Theta: Rect={o.theta_rect.toFixed(2)}  PCA=
+          {"  "}Theta: Rect={o.theta_rect.toFixed(2)} PCA=
           {o.theta_pca.toFixed(2)}
           {"\n\n"}
           {"  "}Target:
@@ -79,19 +79,39 @@ Detected objects: ${objects.length}
           {"\n"}
           {"    "}Rz={o.target.target_Rz.toFixed(2)}
           {"\n\n"}
-          {"  "}Edges:{" "}
+          {"  "}Inspection:
+          {"\n"}
+          {"    "}Width:{" "}
+          {o.inspection?.width_mm != null
+            ? `${o.inspection.width_mm.toFixed(2)} mm`
+            : "N/A"}
+          {"\n"}
+          {"    "}Height:{" "}
+          {o.inspection?.height_mm != null
+            ? `${o.inspection.height_mm.toFixed(2)} mm`
+            : "N/A"}
+          {"\n"}
+          {"    "}Area:{" "}
+          {o.inspection?.area_mm2 != null
+            ? `${o.inspection.area_mm2.toFixed(2)} mm²`
+            : "N/A"}
+          {"\n"}
+          {"    "}Perimeter:{" "}
+          {o.inspection?.perimeter_mm != null
+            ? `${o.inspection.perimeter_mm.toFixed(2)} mm`
+            : "N/A"}
+          {"\n\n"}
+          {"    "}Edges:{" "}
           {o.inspection?.edges_mm?.length
             ? o.inspection.edges_mm.map((v) => v.toFixed(2)).join(", ")
             : "none"}
           {"\n"}
-          {"  "}Circles:{" "}
+          {"    "}Circles:{" "}
           {o.inspection?.circles?.length
             ? o.inspection.circles
                 .map(
-                  (c, idx) =>
-                    `D=${c.diameter_mm.toFixed(
-                      2
-                    )}mm (R=${c.radius_mm.toFixed(2)}mm)`
+                  (c) =>
+                    `D=${c.diameter_mm.toFixed(2)}mm (R=${c.radius_mm.toFixed(2)}mm)`,
                 )
                 .join(", ")
             : "none"}

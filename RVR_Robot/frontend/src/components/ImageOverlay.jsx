@@ -1,4 +1,4 @@
-import { useEffect, useRef, useMemo } from "react";
+import { useEffect, useRef, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 
 export default function ImageOverlay({ imgRef }) {
@@ -9,16 +9,22 @@ export default function ImageOverlay({ imgRef }) {
 
   const rawResult = running ? analysis : cameraAnalyze;
 
+  /* ================= TOGGLE STATE ================= */
+  const [show, setShow] = useState({
+    edges: false,
+    circles: true,
+    width: false,
+    height: false,
+    area: true,
+    perimeter: false,
+  });
+
   /* ================= NORMALIZE RESPONSE ================= */
   const analyzeResult = useMemo(() => {
     if (!rawResult || rawResult.success === false) return null;
 
-    // ✅ Multi-object response
-    if (Array.isArray(rawResult.objects)) {
-      return rawResult;
-    }
+    if (Array.isArray(rawResult.objects)) return rawResult;
 
-    // ✅ Single-object response → wrap as one object
     return {
       success: true,
       objects: [
@@ -40,12 +46,19 @@ export default function ImageOverlay({ imgRef }) {
   }, [rawResult]);
 
   useEffect(() => {
+    if (
+      !imgRef.current ||
+      !canvasRef.current ||
+      !analyzeResult?.objects?.length
+    )
+      return;
+
     const drawnLabels = [];
 
     function placeLabel(x, y, w, h) {
       let ly = y;
-
       let collision = true;
+
       while (collision) {
         collision = false;
         for (const r of drawnLabels) {
@@ -53,7 +66,7 @@ export default function ImageOverlay({ imgRef }) {
             x < r.x + r.w && x + w > r.x && ly < r.y + r.h && ly + h > r.y;
 
           if (overlap) {
-            ly -= h + 4; // push up
+            ly -= h + 4;
             collision = true;
             break;
           }
@@ -63,13 +76,6 @@ export default function ImageOverlay({ imgRef }) {
       drawnLabels.push({ x, y: ly, w, h });
       return ly;
     }
-
-    if (
-      !imgRef.current ||
-      !canvasRef.current ||
-      !analyzeResult?.objects?.length
-    )
-      return;
 
     const img = imgRef.current;
     const canvas = canvasRef.current;
@@ -85,7 +91,7 @@ export default function ImageOverlay({ imgRef }) {
     const scaleY = rect.height / img.naturalHeight;
     const S = (p) => [p[0] * scaleX, p[1] * scaleY];
 
-    /* ===== STATIC CENTER (draw once) ===== */
+    /* ===== STATIC CENTER ===== */
     const staticCenter =
       analyzeResult.objects[0]?.static_center_px ?? rawResult?.static_center_px;
 
@@ -105,7 +111,7 @@ export default function ImageOverlay({ imgRef }) {
     analyzeResult.objects.forEach((obj, idx) => {
       const color = ["red", "lime", "cyan", "orange", "magenta"][idx % 5];
 
-      /* center */
+      /* Center */
       if (obj.center_px) {
         const [x, y] = S(obj.center_px);
         ctx.fillStyle = color;
@@ -114,7 +120,7 @@ export default function ImageOverlay({ imgRef }) {
         ctx.fill();
       }
 
-      /* contour */
+      /* Contour */
       if (obj.contour_px) {
         ctx.strokeStyle = "lime";
         ctx.lineWidth = 2;
@@ -127,7 +133,7 @@ export default function ImageOverlay({ imgRef }) {
         ctx.stroke();
       }
 
-      /* bounding box (skip for circles) */
+      /* Bounding box (skip circles) */
       if (obj.box_px && !obj.inspection?.circles?.length) {
         ctx.strokeStyle = "blue";
         ctx.lineWidth = 2;
@@ -140,8 +146,8 @@ export default function ImageOverlay({ imgRef }) {
         ctx.stroke();
       }
 
-      /* edges + length */
-      if (obj.edges_px && obj.inspection?.edges_mm) {
+      /* ===== EDGES ===== */
+      if (show.edges && obj.edges_px && obj.inspection?.edges_mm) {
         ctx.strokeStyle = "yellow";
         ctx.fillStyle = "yellow";
         ctx.font = "12px monospace";
@@ -166,9 +172,8 @@ export default function ImageOverlay({ imgRef }) {
         });
       }
 
-      /* holes */
-      /* circles */
-      if (obj.inspection?.circles?.length) {
+      /* ===== CIRCLES ===== */
+      if (show.circles && obj.inspection?.circles?.length) {
         ctx.strokeStyle = "cyan";
         ctx.fillStyle = "cyan";
         ctx.font = "12px monospace";
@@ -176,22 +181,66 @@ export default function ImageOverlay({ imgRef }) {
         obj.inspection.circles.forEach((c) => {
           const [cx, cy] = S(c.center_px);
 
-          // draw circle
           ctx.beginPath();
           ctx.arc(cx, cy, c.radius_px * scaleX, 0, Math.PI * 2);
           ctx.stroke();
 
-          // center dot
           ctx.beginPath();
           ctx.arc(cx, cy, 3, 0, Math.PI * 2);
           ctx.fill();
 
-          // label
           ctx.fillText(`Ø ${c.diameter_mm.toFixed(2)} mm`, cx + 8, cy - 6);
         });
       }
 
-      /* ID label (NO OVERLAP) */
+      /* ===== DIMENSIONS ===== */
+      if (show.width || show.height || show.area || show.perimeter) {
+        const [cx, cy] = S(obj.center_px || [0, 0]);
+        ctx.font = "12px monospace";
+
+        let lines = [];
+
+        if (show.width && obj.inspection?.width_mm != null)
+          lines.push(`W: ${obj.inspection.width_mm.toFixed(2)} mm`);
+
+        if (show.height && obj.inspection?.height_mm != null)
+          lines.push(`H: ${obj.inspection.height_mm.toFixed(2)} mm`);
+
+        if (show.area && obj.inspection?.area_mm2 != null)
+          lines.push(`A: ${obj.inspection.area_mm2.toFixed(2)} mm²`);
+
+        if (show.perimeter && obj.inspection?.perimeter_mm != null)
+          lines.push(`P: ${obj.inspection.perimeter_mm.toFixed(2)} mm`);
+
+        if (lines.length) {
+          const padding = 6;
+          const lineHeight = 14;
+          const width =
+            Math.max(...lines.map((l) => ctx.measureText(l).width)) +
+            padding * 2;
+          const height = lines.length * lineHeight + padding * 2;
+
+          const x = cx + 15;
+          const y = cy + 15;
+
+          ctx.fillStyle = "rgba(0,0,0,0.75)";
+          ctx.fillRect(x, y, width, height);
+
+          ctx.strokeStyle = "white";
+          ctx.strokeRect(x, y, width, height);
+
+          ctx.fillStyle = "white";
+          lines.forEach((line, i) => {
+            ctx.fillText(
+              line,
+              x + padding,
+              y + padding + (i + 1) * lineHeight - 4,
+            );
+          });
+        }
+      }
+
+      /* ===== ID LABEL ===== */
       if (obj.center_px) {
         const [x, y] = S(obj.center_px);
         const label = `${idx + 1}`;
@@ -207,23 +256,66 @@ export default function ImageOverlay({ imgRef }) {
         ctx.fillRect(lx, ly, w, h);
 
         ctx.strokeStyle = "white";
-        ctx.lineWidth = 1;
         ctx.strokeRect(lx, ly, w, h);
 
         ctx.fillStyle = "white";
         ctx.fillText(label, lx + 4, ly + 12);
       }
     });
-  }, [analyzeResult, rawResult, imgRef]);
+  }, [analyzeResult, rawResult, imgRef, show]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      style={{
-        position: "absolute",
-        inset: 0,
-        pointerEvents: "none",
-      }}
-    />
+    <>
+      {/* ===== TOGGLE PANEL (NO BACKGROUND) ===== */}
+      <div
+        style={{
+          position: "absolute",
+          top: 8,
+          right: 8,
+          padding: 4,
+          fontSize: 12,
+          display: "flex",
+          flexDirection: "column",
+          gap: 4,
+          zIndex: 10,
+        }}
+      >
+        {Object.keys(show).map((key) => (
+          <label
+            key={key}
+            style={{
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              color: "#222",
+              fontWeight: 500,
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={show[key]}
+              onChange={() =>
+                setShow((prev) => ({
+                  ...prev,
+                  [key]: !prev[key],
+                }))
+              }
+            />
+            {key}
+          </label>
+        ))}
+      </div>
+
+      {/* ===== CANVAS ===== */}
+      <canvas
+        ref={canvasRef}
+        style={{
+          position: "absolute",
+          inset: 0,
+          pointerEvents: "none",
+        }}
+      />
+    </>
   );
 }

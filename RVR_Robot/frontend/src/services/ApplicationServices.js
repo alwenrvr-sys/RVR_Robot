@@ -46,7 +46,7 @@ const previewDXF = (file) => {
   const formData = new FormData();
   formData.append("file", file);
 
-  return axios.post(HOST + APPLICATION_API.APP_PICKSORT_STATUS, formData, {
+  return axios.post(HOST + APPLICATION_API.PREVIEW, formData, {
     withCredentials: true,
     headers: { "Content-Type": "multipart/form-data" },
   });

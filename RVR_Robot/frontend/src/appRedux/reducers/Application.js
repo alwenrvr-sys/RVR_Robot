@@ -23,6 +23,7 @@ import {
   APP_PICKSORT_STOP_FAILURE,
   APP_PICKSORT_STATUS_SUCCESS,
   APP_PICKSORT_STATUS_FAILURE,
+  SET_PRIORITY_ORDER
 } from "../../constants/ActionType";
 
 const initialState = {
@@ -192,6 +193,12 @@ const Applications = (state = initialState, action) => {
         ...state,
         error: action.payload,
       };
+    case SET_PRIORITY_ORDER:
+      return {
+        ...state,
+        priorityOrder: action.payload,
+      };
+
     default:
       return state;
   }

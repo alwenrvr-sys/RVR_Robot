@@ -129,7 +129,8 @@ export default function RightSidebar() {
         </Button>
       </div>
 
-      <Divider />
+      <Divider style={{ margin: "10px 0" }} />
+
       {/* ================= OPTIONS ================= */}
       <h4 className="section-title">Options</h4>
 
@@ -152,7 +153,7 @@ export default function RightSidebar() {
           onChange={(v) => setZLift(v)}
         />
       </div>
-      <Divider />
+      <Divider style={{ margin: "10px 0" }} />
 
       <h4 className="section-title">Motion Control</h4>
 
@@ -200,7 +201,7 @@ export default function RightSidebar() {
         APPLY MOTION PARAMS
       </Button>
 
-      <Divider />
+      <Divider style={{ margin: "10px 0" }} />
 
       {/* ================= CONTROL ================= */}
       <h4 className="section-title">Control</h4>
