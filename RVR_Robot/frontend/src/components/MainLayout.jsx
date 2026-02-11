@@ -355,7 +355,7 @@ function IconStatus({ icon, connected }) {
           height: 40,
           borderRadius: "50%",
           background: "black",
-          border: `2px solid ${connected ? "#52c41a" : "#ff4d4f"}`,
+          border: `3px solid ${connected ? "#52c41a" : "#ff4d4f"}`,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",

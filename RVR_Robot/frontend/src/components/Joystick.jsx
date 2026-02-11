@@ -33,7 +33,7 @@ export default function Joystick() {
                   style={{
                     position: "absolute",
                     inset: 0,
-                    background: "rgba(0,0,0,0.55)",
+                    background: "rgb(255, 255, 255)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",

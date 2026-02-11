@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { useSelector } from "react-redux";
 import ImageOverlay from "./ImageOverlay";
-
+import { FileImageOutlined } from "@ant-design/icons";
 export default function Imagepreview() {
   const imgRef = useRef(null);
   const { running, image_base64 } = useSelector((state) => state.app);
@@ -9,7 +9,31 @@ export default function Imagepreview() {
 
   const imageBase64 = running ? image_base64 : cameraResult?.image_base64;
 
-  if (!imageBase64) return <div>No image</div>;
+  if (!imageBase64)
+    return (
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column", 
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100%",
+        }}
+      >
+        <FileImageOutlined style={{ fontSize: 40 }} />
+
+        <h4
+          style={{
+            marginTop: 8,
+            fontSize: 14,
+            fontWeight: 400,
+            marginBottom: 0,
+          }}
+        >
+          No Image Uploaded
+        </h4>
+      </div>
+    );
 
   return (
     <div className="joystick-preview" style={{ position: "relative" }}>

@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
+import { FileOutlined } from "@ant-design/icons";
 
 export default function Pathpreview() {
   const canvasRef = useRef(null);
@@ -63,7 +64,30 @@ export default function Pathpreview() {
   }, [previewPaths]);
 
   if (!previewPaths) {
-    return <div className="joystick-preview empty">No DXF preview</div>;
+    return (
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100%",
+        }}
+      >
+        <FileOutlined style={{ fontSize: 40 }} />
+
+        <h4
+          style={{
+            marginTop: 8,
+            fontSize: 14,
+            fontWeight: 400,
+            marginBottom: 0,
+          }}
+        >
+          No File Uploaded
+        </h4>
+      </div>
+    );
   }
 
   return <canvas ref={canvasRef} className="path-canvas" />;
