@@ -395,7 +395,6 @@ def sort_analyze_image(
     auto_thresh=True,
     enable_edges=False,
 ):
-    print("minarea=",minarea)
     # ------------------ PREPROCESS ------------------
     gray = cv2.cvtColor(bgr, cv2.COLOR_BGR2GRAY)
     gray = cv2.GaussianBlur(gray, (5, 5), 0)
@@ -485,6 +484,13 @@ def sort_analyze_image(
                 "target_Rz": target_Rz,
             },
         }
+        # Always compute geometry for grouping
+        measurements, approx_edges, _ = measure_edges_and_holes(
+            [subject], sx, sy
+        )
+
+        obj_result["inspection"] = measurements
+
 
         # ------------------ INSPECTION ------------------
         if enable_edges:
@@ -507,9 +513,9 @@ def sort_analyze_image(
                     "diameter_mm": float(2 * r_mm),
                 })
 
-                # ❌ DO NOT compute edges
-                measurements["circles"] = circles
-                obj_result["inspection"] = measurements
+                # Keep existing geometry and just add circles
+                obj_result["inspection"]["circles"] = circles
+
 
             # ==================================
             # CASE 2: NON-CIRCULAR OBJECT
@@ -536,8 +542,8 @@ def sort_analyze_image(
 
                 circles = deduplicate_circles(circles)
 
-                measurements["circles"] = circles
                 obj_result["inspection"] = measurements
+                obj_result["inspection"]["circles"] = circles
 
                 obj_result["edges_px"] = approx_edges.reshape(-1, 2).astype(int).tolist()
 
@@ -550,13 +556,8 @@ def sort_analyze_image(
     for new_id, obj in enumerate(results, start=1):
         obj["id"] = new_id
 
-    # Only group if inspection data exists
-    objects_with_geometry = [
-        o for o in results
-        if "inspection" in o and "width_mm" in o["inspection"]
-    ]
-
-    groups = group_objects_by_geometry(objects_with_geometry)
+    # Always group using computed geometry
+    groups = group_objects_by_geometry(results)
 
     return {
         "success": True,
@@ -622,6 +623,7 @@ def group_objects_by_geometry(
                 and within_tol(area, ref["area"], area_tol)
             ):
                 group["object_ids"].append(obj["id"])
+                group["targets"].append(obj["target"])  # 👈 ADD THIS
                 placed = True
                 break
 
@@ -634,11 +636,12 @@ def group_objects_by_geometry(
                     "height": height,
                     "area": area
                 },
-                "object_ids": [obj["id"]]  
+                "object_ids": [obj["id"]],
+                "targets": [obj["target"]]   
             })
 
-
     return groups
+
 
 
 def within_tol(value, reference, tol):
@@ -646,28 +649,35 @@ def within_tol(value, reference, tol):
         return False
     return abs(value - reference) <= reference * tol
 
-def set_priority_for_groups(groups, priority_order):
-    """
-    groups: result from group_objects_by_geometry()
-    priority_order: list of group_ids from frontend (e.g. ["G3", "G1", "G2"])
 
-    Returns:
-        Ordered flat list of objects ready for picking
-    """
+def set_priority_for_groups(analysis: dict, priority_order: list):
 
-    # Map group_id → objects
-    group_map = {g["group_id"]: g["objects"] for g in groups}
+    if not analysis.get("success"):
+        return []
+
+    groups = analysis.get("groups", [])
+    objects = analysis.get("objects", [])
+
+    # Map object_id → full object data
+    object_map = {obj["id"]: obj for obj in objects}
 
     ordered_objects = []
 
-    # 1️⃣ Add groups in user-defined priority
+    # 1️⃣ Follow user priority
     for gid in priority_order:
-        if gid in group_map:
-            ordered_objects.extend(group_map[gid])
+        group = next((g for g in groups if g["group_id"] == gid), None)
+        if not group:
+            continue
 
-    # 2️⃣ Add remaining groups not mentioned
-    for g in groups:
-        if g["group_id"] not in priority_order:
-            ordered_objects.extend(g["objects"])
+        for obj_id in group["object_ids"]:
+            if obj_id in object_map:
+                ordered_objects.append(object_map[obj_id])
+
+    # 2️⃣ Add remaining objects (if any group missing)
+    used_ids = {obj["id"] for obj in ordered_objects}
+
+    for obj in objects:
+        if obj["id"] not in used_ids:
+            ordered_objects.append(obj)
 
     return ordered_objects

@@ -26,8 +26,8 @@ camera = SickCamera("192.168.58.67", 2114)
 
 HOME_POSE   = [260, 431, 160, -180, 0, 45]
 HOME_2_POSE = [700, 10, 160, -180, 0, 45]
-FOCUS       = [10, 700, 350, 180, 0, 45]
-FOCUS_2     = [700, 10, 350, 180, 0, 45]
+FOCUS       = [10, 700, 450, 180, 0, 45]
+FOCUS_2     = [700, 10, 450, 180, 0, 45]
 
 FTP_IMAGE_DIR = r"C:\ftp_root\nova"
 
@@ -39,11 +39,12 @@ AUTO_RUN = False
 
 AUTO_RESULT = {
     "success": None,
-     "stage": "idle",  
+    "stage": "idle",  
     "image_base64": None,
     "analysis": None,
     "target_pose": None,
     "tcp": None,
+    "priority_order": [],
     "error": None,
 }
 
@@ -135,62 +136,68 @@ def PickAndSort():
                 _, tcp = robot.get_tcp()
 
                 analysis = sort_analyze_image(bgr, tcp)
-                AUTO_RESULT.update({
-                    "stage": "analyzed",
-                    "analysis": analysis,
-                    "image_base64": image_to_base64(bgr),
-                    "tcp": tcp,
-                })
+
                 if not analysis.get("success"):
-                    AUTO_RESULT.update({
-                        "success": False,
-                        "image_base64": image_to_base64(bgr),
-                        "analysis": analysis,
-                        "tcp": tcp,
-                    })
                     continue
 
-                tgt = analysis["target"]
+                objects = analysis.get("objects", [])
+                groups = analysis.get("groups", [])
 
-                TARGET_Z = 140.0
-                target_pose = [
-                    tgt["target_X"],
-                    tgt["target_Y"],
-                    TARGET_Z,
-                    tcp[3],
-                    tcp[4],
-                    tgt["target_Rz"],
-                ]
-
-                # ---------- MOVE TO TARGET ----------
-                print("[AUTO] Moving to target")
-                res = robot.move_to_pose_l(target_pose)
-                if not res["success"]:
-                    print("[AUTO] Target move failed")
+                if not objects:
                     continue
 
-                time.sleep(0.5)
+                from app.robot.Helpers import set_priority_for_groups
 
-                # ---------- PICK ----------
-                print("[AUTO] Picking")
-                robot.pick_unpick()
-                time.sleep(0.5)
+                priority_order = AUTO_RESULT.get("priority_order", [])
+                print("priority order:",priority_order)
+                ordered_objects = set_priority_for_groups(
+                    analysis,
+                    priority_order
+                )
 
-                # ---------- RETREAT ----------
-                print("[AUTO] Retreat to FOCUS")
-                robot.move_to_pose_l(FOCUS)
-                time.sleep(0.5)
+                for obj in ordered_objects:
 
-                # ---------- PLACE ----------
-                print("[AUTO] Move to FOCUS_2")
-                robot.move_to_pose_l(FOCUS_2)
-                time.sleep(0.5)
+                    if not AUTO_RUN:
+                        break
 
-                print("[AUTO] Move to HOME_2")
-                robot.move_to_pose_l(HOME_2_POSE)
+                    tgt = obj["target"]
 
-                print("[AUTO] Placing")
-                robot.pick_unpick()
+                    TARGET_Z = 140.0
+
+                    target_pose = [
+                        tgt["target_X"],
+                        tgt["target_Y"],
+                        TARGET_Z,
+                        tcp[3],
+                        tcp[4],
+                        tgt["target_Rz"],
+                    ]
+
+                    print(f"[AUTO] Picking object {obj['id']}")
+
+                    res = robot.move_to_pose_l(target_pose)
+                    if not res["success"]:
+                        continue
+
+                    time.sleep(0.4)
+
+                    robot.pick_unpick()
+                    time.sleep(0.4)
+
+                    robot.move_to_pose_l(FOCUS)
+                    time.sleep(0.4)
+
+                    robot.move_to_pose_l(FOCUS_2)
+                    time.sleep(0.4)
+
+                    robot.move_to_pose_l(HOME_2_POSE)
+                    robot.pick_unpick()
+                    
+                    robot.move_to_pose_l(FOCUS)
+                    time.sleep(0.6)
+
+                print("[AUTO] All objects processed")
+
 
                 # ---------- STORE RESULT ----------
                 AUTO_RESULT.update({

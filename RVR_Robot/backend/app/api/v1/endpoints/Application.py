@@ -1,9 +1,10 @@
 import tempfile
 import os
 import threading
-from app.schemas.item import AutoPickPlaceStartResponse,AutoPickPlaceStopResponse,AutoPickPlaceStatusResponse,DXFPreviewResponse,DXFDrawRequest,DXFDrawResponse
+from app.schemas.item import AutoPickPlaceStartResponse,AutoPickPlaceStopResponse,AutoPickPlaceStatusResponse,DXFPreviewResponse,DXFDrawRequest,DXFDrawResponse,PriorityRequest
 from app.Applications.PickAndPlace import AUTO_RESULT, AUTO_RUN, PickAndPlace,StopPickAndPlace
 from app.Applications.PickAndSort import AUTO_RESULT, AUTO_RUN, PickAndSort,StopPickAndSort
+from app.robot.Helpers import set_priority_for_groups
 from app.Applications.ReadandDraw import load_dxf,scale_paths_to_a4
 from fastapi import APIRouter, File, HTTPException, UploadFile
 from app.robot.Robot import get_robot
@@ -237,3 +238,11 @@ def _draw_worker(paths, req):
     except Exception as e:
         print("DXF draw error:", e)
 
+@router.post("/set-priority")
+def set_priority(req: PriorityRequest):
+    global AUTO_RESULT
+    AUTO_RESULT["priority_order"] = req.priority
+    return {
+        "success": True,
+        "priority_order": AUTO_RESULT["priority_order"]
+    }

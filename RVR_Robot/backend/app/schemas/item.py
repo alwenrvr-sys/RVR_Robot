@@ -113,10 +113,16 @@ class GeometryRef(BaseModel):
     height: float
     area: float
 
+class TargetPose(BaseModel):
+    target_X: float
+    target_Y: float
+    target_Rz: float
+
 class ObjectGroup(BaseModel):
     group_id: str
     ref: GeometryRef
     object_ids: List[int]
+    targets: List[TargetPose]
   
 class AllAnalyzeImageResponse(BaseModel):
     success: bool
@@ -171,3 +177,6 @@ class DXFDrawResponse(BaseModel):
     message: str
     path_count: int
     paths: List[List[Point2D]]
+
+class PriorityRequest(BaseModel):
+    priority: List[str]

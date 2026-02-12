@@ -12,10 +12,10 @@ export default function ImageOverlay({ imgRef }) {
   /* ================= TOGGLE STATE ================= */
   const [show, setShow] = useState({
     edges: false,
-    circles: true,
+    circles: false,
     width: false,
     height: false,
-    area: true,
+    area: false,
     perimeter: false,
   });
 

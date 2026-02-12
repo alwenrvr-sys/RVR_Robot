@@ -22,6 +22,9 @@ import {
   DXF_DRAW,
   DXF_DRAW_SUCCESS,
   DXF_DRAW_FAILURE,
+  SET_PRIORITY_ORDER_REQUEST,
+  SET_PRIORITY_ORDER_SUCCESS,
+  SET_PRIORITY_ORDER_FAILURE,
 } from "../../constants/ActionType";
 
 import { APPLICATION_SERVICE } from "../../services/ApplicationServices";
@@ -153,10 +156,25 @@ function* stopAutoSortAsync() {
   }
 }
 
+function* setPriorityAsync(action) {
+  try {
+    const res = yield call(APPLICATION_SERVICE.SET_PRIORITY, action.payload);
+    yield put({
+      type: SET_PRIORITY_ORDER_SUCCESS,
+      payload: action.payload,
+    });
+  } catch (err) {
+    yield put({
+      type: SET_PRIORITY_ORDER_FAILURE,
+      payload: err.response?.data || err.message,
+    });
+  }
+}
 /* -------------------- WATCHER -------------------- */
 export function* AppPickandSort() {
   yield takeEvery(APP_PICKSORT_START, startAutoSortAsync);
   yield takeEvery(APP_PICKSORT_STOP, stopAutoSortAsync);
+  yield takeEvery(SET_PRIORITY_ORDER_REQUEST, setPriorityAsync);
 }
 
 function* previewDXFAsync(action) {

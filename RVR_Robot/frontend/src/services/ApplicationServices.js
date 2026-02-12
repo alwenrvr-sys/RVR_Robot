@@ -23,7 +23,7 @@ const getAutoPickStatus = () =>
     withCredentials: true,
   });
 
-  const startPickandSort = () =>
+const startPickandSort = () =>
   axios.post(
     HOST + APPLICATION_API.APP_PICKSORT_START,
     {},
@@ -55,13 +55,21 @@ const previewDXF = (file) => {
 const drawDXF = (params) =>
   axios.post(HOST + APPLICATION_API.DRAW, params, { withCredentials: true });
 
+const setPriority = (order) =>
+  axios.post(
+    HOST + APPLICATION_API.SET_PRIORITY,
+    { priority: order },
+    { withCredentials: true },
+  );
+
 export const APPLICATION_SERVICE = {
   START: startAutoPick,
   STOP: stopAutoPick,
   STATUS: getAutoPickStatus,
-  START_SORT:startPickandSort,
-  STOP_SORT:stopPickandSort,
-  STATUS_SORT:getPickandSort,
+  START_SORT: startPickandSort,
+  STOP_SORT: stopPickandSort,
+  STATUS_SORT: getPickandSort,
   PREVIEW: previewDXF,
   DRAW: drawDXF,
+  SET_PRIORITY: setPriority,
 };

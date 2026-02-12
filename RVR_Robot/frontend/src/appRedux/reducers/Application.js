@@ -23,7 +23,9 @@ import {
   APP_PICKSORT_STOP_FAILURE,
   APP_PICKSORT_STATUS_SUCCESS,
   APP_PICKSORT_STATUS_FAILURE,
-  SET_PRIORITY_ORDER
+  SET_PRIORITY_ORDER_REQUEST,
+  SET_PRIORITY_ORDER_SUCCESS,
+  SET_PRIORITY_ORDER_FAILURE,
 } from "../../constants/ActionType";
 
 const initialState = {
@@ -39,6 +41,8 @@ const initialState = {
   origin: null,
   params: null,
   pathCount: 0,
+  priorityOrder: [],
+  priorityLoading: false,
   error: null,
 };
 
@@ -193,10 +197,25 @@ const Applications = (state = initialState, action) => {
         ...state,
         error: action.payload,
       };
-    case SET_PRIORITY_ORDER:
+
+    case SET_PRIORITY_ORDER_REQUEST:
       return {
         ...state,
+        priorityLoading: true,
+      };
+
+    case SET_PRIORITY_ORDER_SUCCESS:
+      return {
+        ...state,
+        priorityLoading: false,
         priorityOrder: action.payload,
+      };
+
+    case SET_PRIORITY_ORDER_FAILURE:
+      return {
+        ...state,
+        priorityLoading: false,
+        error: action.payload,
       };
 
     default:

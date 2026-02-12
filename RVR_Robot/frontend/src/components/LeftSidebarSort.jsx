@@ -167,7 +167,7 @@ export default function LeftSidebarSort({ onModeChange }) {
         block
         disabled={!connected}
         onClick={() => {
-          dispatch(resetAnalysis());
+          // dispatch(resetAnalysis());
           dispatch(stopAutoSort());
         }}
       >

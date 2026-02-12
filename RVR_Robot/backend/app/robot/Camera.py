@@ -68,30 +68,24 @@ class SickCamera:
             return False
 
     def trigger_with_autosetup(self, current_z: float):
-        """
-        Trigger image.
-        Run AutoSetup only if Z change is greater than ±150.
-        """
         if not self.sock:
             raise RuntimeError("Camera not connected")
 
-        run_autosetup = False
+        if self.last_z is None or abs(current_z - self.last_z) >= self.z_tolerance:
 
-        if self.last_z is None:
-            run_autosetup = True
-        elif abs(current_z - self.last_z) > self.z_tolerance:
-            run_autosetup = True
-
-        if run_autosetup:
             print(f"[CAMERA] Z changed significantly ({self.last_z} → {current_z}), running AutoSetup")
+
             self._send("call ImageProviderV2D:0 AutoSetup")
             time.sleep(15)
+
             self.last_z = current_z
+
         else:
-            print(f"[CAMERA] Z change within ±{self.z_tolerance}, skipping AutoSetup")
+            print(f"[CAMERA] Z within ±{self.z_tolerance}, skipping AutoSetup")
 
         self._send("trigger")
         print("[CAMERA] Trigger sent")
+
         
     def run_autosetup(self):
         """

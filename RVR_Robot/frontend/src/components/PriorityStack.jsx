@@ -11,12 +11,14 @@ import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { Button } from "antd";
 import { LockOutlined, UnlockOutlined } from "@ant-design/icons";
+import { useDispatch } from "react-redux";
+import { setPriorityOrder } from "../appRedux/actions/Application";
 
 function SortableItem({ id, group, expanded, toggle, isLocked }) {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({
       id,
-      disabled: isLocked, // 🔥 disable drag when locked
+      disabled: isLocked, 
     });
 
   const style = {
@@ -36,14 +38,11 @@ function SortableItem({ id, group, expanded, toggle, isLocked }) {
 
   return (
     <div ref={setNodeRef} style={{ marginBottom: 8 }}>
-      {/* HEADER */}
       <div style={style} {...attributes}>
-        {/* CLICK AREA */}
         <div style={{ flex: 1, cursor: "pointer" }} onClick={() => toggle(id)}>
           {group.group_id} ({group.object_ids.length})
         </div>
 
-        {/* DRAG HANDLE */}
         {!isLocked && (
           <div
             {...listeners}
@@ -58,7 +57,6 @@ function SortableItem({ id, group, expanded, toggle, isLocked }) {
         )}
       </div>
 
-      {/* EXPAND */}
       {expanded && (
         <div
           style={{
@@ -80,6 +78,7 @@ function SortableItem({ id, group, expanded, toggle, isLocked }) {
   );
 }
 export default function PriorityStack() {
+  const dispatch = useDispatch();
   const analyzeResult = useSelector((state) => state.camera.analyzeResult);
   const running = useSelector((state) => state.app.running);
 
@@ -124,10 +123,9 @@ export default function PriorityStack() {
       style={{
         display: "flex",
         flexDirection: "column",
-        height: 400, // adjust as needed
+        height: 400, 
       }}
     >
-      {/* 🔒 ALWAYS VISIBLE STATIC HEADER */}
       <div
         style={{
           display: "flex",
@@ -140,14 +138,17 @@ export default function PriorityStack() {
         <h4 className="section-title" style={{ margin: 0 }}>
           Priority Order
         </h4>
-
-        {/* 🔐 Show lock only if groups exist */}
         {groups.length > 0 && (
           <Button
             shape="circle"
             size="large"
             type={locked ? "primary" : "default"}
-            onClick={() => setLocked((prev) => !prev)}
+            onClick={() => {
+              if (!locked) {
+                dispatch(setPriorityOrder(items));
+              }
+              setLocked((prev) => !prev);
+            }}
             disabled={running}
             icon={
               locked ? (
@@ -160,7 +161,6 @@ export default function PriorityStack() {
         )}
       </div>
 
-      {/* 📦 SCROLLABLE AREA ONLY */}
       <div
         style={{
           flex: 1,
@@ -172,7 +172,6 @@ export default function PriorityStack() {
         }}
         className="priority-scroll"
       >
-        {/* 🔹 SHOW MESSAGE IF NO GROUPS */}
         {groups.length === 0 && (
           <div
             style={{
@@ -186,7 +185,6 @@ export default function PriorityStack() {
           </div>
         )}
 
-        {/* 🔹 SHOW DRAG LIST IF GROUPS EXIST */}
         {groups.length > 0 && (
           <DndContext
             collisionDetection={closestCenter}
@@ -200,7 +198,7 @@ export default function PriorityStack() {
               {items.map((gid) => {
                 const group = groups.find((g) => g.group_id === gid);
 
-                if (!group) return null; 
+                if (!group) return null;
 
                 return (
                   <SortableItem
