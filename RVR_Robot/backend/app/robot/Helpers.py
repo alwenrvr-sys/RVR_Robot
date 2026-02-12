@@ -6,6 +6,9 @@ import os
 import time
 import base64
 
+GROUP_REGISTRY = []
+GROUP_COUNTER = 0
+
 
 FTP_IMAGE_DIR = r"C:\ftp_root\nova"
 SUPPORTED_EXTS = (".png", ".jpg", ".jpeg", ".bmp", ".tif", ".tiff")
@@ -395,6 +398,17 @@ def sort_analyze_image(
     auto_thresh=True,
     enable_edges=False,
 ):
+    gray_check = cv2.cvtColor(bgr, cv2.COLOR_BGR2GRAY)
+    gray_check = cv2.GaussianBlur(gray_check, (5, 5), 0)
+
+    if not object_present(gray_check):
+        return {
+        "success": False,
+        "count": 0,
+        "objects": [],
+        "groups": [],
+        "reason": "no object present"
+    }
     # ------------------ PREPROCESS ------------------
     gray = cv2.cvtColor(bgr, cv2.COLOR_BGR2GRAY)
     gray = cv2.GaussianBlur(gray, (5, 5), 0)
@@ -549,7 +563,7 @@ def sort_analyze_image(
 
         results.append(obj_result)
 
-    # ------------------ SORT OBJECTS (OPTIONAL) ------------------
+    # ------------------ SORT OBJECTS ------------------
     results.sort(key=lambda o: o["center_px"][0])
 
     # Re-assign ID after sorting
@@ -603,8 +617,9 @@ def group_objects_by_geometry(
     height_tol=0.08,
     area_tol=0.12,
 ):
-    groups = []
-    group_counter = 0
+    global GROUP_REGISTRY, GROUP_COUNTER
+
+    cycle_groups = []
 
     for obj in objects:
 
@@ -612,35 +627,52 @@ def group_objects_by_geometry(
         height = obj["inspection"]["height_mm"]
         area = obj["inspection"]["area_mm2"]
 
-        placed = False
+        matched_group = None
 
-        for group in groups:
-            ref = group["ref"]
+        # 🔍 Try match with existing registry
+        for reg in GROUP_REGISTRY:
+            ref = reg["ref"]
 
             if (
                 within_tol(width, ref["width"], width_tol)
                 and within_tol(height, ref["height"], height_tol)
                 and within_tol(area, ref["area"], area_tol)
             ):
-                group["object_ids"].append(obj["id"])
-                group["targets"].append(obj["target"])  # 👈 ADD THIS
-                placed = True
+                matched_group = reg
                 break
 
-        if not placed:
-            group_counter += 1
-            groups.append({
-                "group_id": f"G{group_counter}",
+        # 🆕 If not found → create new stable group
+        if not matched_group:
+            GROUP_COUNTER += 1
+            matched_group = {
+                "group_id": f"G{GROUP_COUNTER}",
                 "ref": {
                     "width": width,
                     "height": height,
                     "area": area
-                },
-                "object_ids": [obj["id"]],
-                "targets": [obj["target"]]   
-            })
+                }
+            }
+            GROUP_REGISTRY.append(matched_group)
 
-    return groups
+        # 📦 Add object to cycle group
+        group = next(
+            (g for g in cycle_groups if g["group_id"] == matched_group["group_id"]),
+            None
+        )
+
+        if not group:
+            group = {
+                "group_id": matched_group["group_id"],
+                "ref": matched_group["ref"],
+                "object_ids": [],
+                "targets": []
+            }
+            cycle_groups.append(group)
+
+        group["object_ids"].append(obj["id"])
+        group["targets"].append(obj["target"])
+    print("group:",cycle_groups)
+    return cycle_groups
 
 
 
