@@ -34,6 +34,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.api import api_router
 from app.db.base import Base
 from app.db.session import engine
+from app.models.object_image import ObjectImage
+from app.models.object_group import ObjectGroup
 
 app = FastAPI(title="Async FastAPI CRUD")
 

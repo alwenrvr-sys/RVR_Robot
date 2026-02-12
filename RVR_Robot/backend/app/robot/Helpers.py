@@ -6,6 +6,8 @@ import os
 import time
 import base64
 
+from app.ML_Train.Helpers import crop_and_store_by_group
+
 GROUP_REGISTRY = []
 GROUP_COUNTER = 0
 
@@ -671,7 +673,7 @@ def group_objects_by_geometry(
 
         group["object_ids"].append(obj["id"])
         group["targets"].append(obj["target"])
-    print("group:",cycle_groups)
+
     return cycle_groups
 
 
@@ -713,3 +715,23 @@ def set_priority_for_groups(analysis: dict, priority_order: list):
             ordered_objects.append(obj)
 
     return ordered_objects
+
+def fetch_datasets(full_image, analysis):
+
+    if not analysis.get("success"):
+        return
+
+    for group in analysis["groups"]:
+        gid = group["group_id"]
+
+        for obj_id in group["object_ids"]:
+            obj = next(
+                o for o in analysis["objects"]
+                if o["id"] == obj_id
+            )
+
+            crop_and_store_by_group(
+                full_image=full_image,
+                obj=obj,
+                group_id=gid
+            )

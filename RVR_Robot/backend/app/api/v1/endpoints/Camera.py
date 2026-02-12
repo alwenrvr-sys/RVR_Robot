@@ -12,7 +12,8 @@ from app.schemas.item import (
     AllAnalyzeImageResponse
 )
 from app.robot.Camera_service import trigger_camera,run_camera_autosetup,ping_camera
-from app.robot.Helpers import analyze_image,sort_analyze_image
+from app.robot.Helpers import analyze_image,sort_analyze_image,fetch_datasets
+
 
 router = APIRouter(prefix="/camera", tags=["Camera"])
 
@@ -97,6 +98,8 @@ def analyze_image_api(payload: AnalyzeImageRequest):
             # enable_ocr=payload.enable_ocr,
             # ocr_roi=payload.ocr_roi
         )
+        # if result.get("success"):
+        #     fetch_datasets(bgr, result)
 
         return result
 
