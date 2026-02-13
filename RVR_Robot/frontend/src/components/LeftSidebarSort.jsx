@@ -23,7 +23,6 @@ export default function LeftSidebarSort({ onModeChange }) {
   const { pose } = useSelector((state) => state.robot);
   const { connected } = useSelector((state) => state.robot);
   const { image_base64, running } = useSelector((state) => state.app);
-  const [zValue, setZValue] = useState(null);
   const isAuto = running;
   const uiLocked = autosetupLoading;
   const [imageParams, setImageParams] = useState({
@@ -42,25 +41,17 @@ export default function LeftSidebarSort({ onModeChange }) {
 
   useEffect(() => {
     dispatch(getTcp());
-    dispatch(resetAnalysis());
-  }, [dispatch]);
-
-  useEffect(() => {
-    if (pose?.z == null) return;
-
-    setZValue(pose.z);
-    console.log("Current Z value:", pose.z);
-  }, [pose?.z]);
+  }, []);
 
   const scaleX = result?.scale_x_px_per_mm;
   const scaleY = result?.scale_y_px_per_mm;
 
   const handleTriggerCamera = () => {
-    if (!zValue) {
+    if (!pose?.z) {
       console.warn("TCP Z not available");
       return;
     }
-    dispatch(triggerCamera(zValue));
+    dispatch(triggerCamera(pose.z));
   };
 
   const imageBase64 = isAuto ? image_base64 : result?.image_base64;

@@ -18,7 +18,7 @@ function SortableItem({ id, group, expanded, toggle, isLocked }) {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({
       id,
-      disabled: isLocked, 
+      disabled: isLocked,
     });
 
   const style = {
@@ -83,7 +83,7 @@ export default function PriorityStack() {
   const running = useSelector((state) => state.app.running);
 
   const groups = analyzeResult?.groups || [];
-
+  const priorityOrder = useSelector((state) => state.app.priorityOrder);
   const [items, setItems] = useState([]);
   const [expandedId, setExpandedId] = useState(null);
   const [locked, setLocked] = useState(false);
@@ -95,12 +95,12 @@ export default function PriorityStack() {
   }, [running]);
 
   useEffect(() => {
-    if (groups.length > 0) {
-      setItems(groups.map((g) => g.group_id));
+    if (priorityOrder && priorityOrder.length > 0) {
+      setItems(priorityOrder);
     } else {
-      setItems([]);
+      setItems(groups.map((g) => g.group_id));
     }
-  }, [groups]);
+  }, [groups, priorityOrder]);
 
   const toggle = (id) => {
     setExpandedId((prev) => (prev === id ? null : id));
@@ -123,7 +123,7 @@ export default function PriorityStack() {
       style={{
         display: "flex",
         flexDirection: "column",
-        height: 400, 
+        height: 400,
       }}
     >
       <div
