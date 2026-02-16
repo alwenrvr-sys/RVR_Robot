@@ -14,12 +14,18 @@ import { LockOutlined, UnlockOutlined } from "@ant-design/icons";
 import { useDispatch } from "react-redux";
 import { setPriorityOrder } from "../appRedux/actions/Application";
 
-function SortableItem({ id, group, expanded, toggle, isLocked }) {
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({
-      id,
-      disabled: isLocked,
-    });
+function SortableItem({ id, group, expandedId, setExpandedId, isLocked }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id,
+    disabled: isLocked,
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -33,13 +39,24 @@ function SortableItem({ id, group, expanded, toggle, isLocked }) {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    opacity: isLocked ? 0.7 : 1,
+    opacity: isDragging ? 0.4 : isLocked ? 0.7 : 1,
   };
 
+  const isExpanded = expandedId === id && !isDragging;
+
   return (
-    <div ref={setNodeRef} style={{ marginBottom: 8 }}>
+    <div
+      ref={setNodeRef}
+      style={{ marginBottom: 8 }}
+      onMouseEnter={() => {
+        if (!isDragging) setExpandedId(id);
+      }}
+      onMouseLeave={() => {
+        setExpandedId(null);
+      }}
+    >
       <div style={style} {...attributes}>
-        <div style={{ flex: 1, cursor: "pointer" }} onClick={() => toggle(id)}>
+        <div style={{ flex: 1 }}>
           {group.group_id} ({group.object_ids.length})
         </div>
 
@@ -57,7 +74,7 @@ function SortableItem({ id, group, expanded, toggle, isLocked }) {
         )}
       </div>
 
-      {expanded && (
+      {isExpanded && (
         <div
           style={{
             background: "black",
@@ -67,9 +84,9 @@ function SortableItem({ id, group, expanded, toggle, isLocked }) {
             marginTop: 4,
           }}
         >
-          {group.object_ids.map((id) => (
-            <div key={id} style={{ fontSize: 13 }}>
-              • Obj {id}
+          {group.object_ids.map((objId) => (
+            <div key={objId} style={{ fontSize: 13 }}>
+              • Obj {objId}
             </div>
           ))}
         </div>
@@ -77,6 +94,7 @@ function SortableItem({ id, group, expanded, toggle, isLocked }) {
     </div>
   );
 }
+
 export default function PriorityStack() {
   const dispatch = useDispatch();
   const analyzeResult = useSelector((state) => state.camera.analyzeResult);
@@ -205,8 +223,8 @@ export default function PriorityStack() {
                     key={gid}
                     id={gid}
                     group={group}
-                    expanded={expandedId === gid}
-                    toggle={toggle}
+                    expandedId={expandedId}
+                    setExpandedId={setExpandedId}
                     isLocked={locked}
                   />
                 );

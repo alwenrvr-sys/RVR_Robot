@@ -30,6 +30,7 @@ function* getCameraPingAsync() {
       type: GET_CAMERA_PING_FAILURE,
       payload: error.message,
     });
+    yield put(showNotification("camera", "Camera Disconnected"));
   }
 }
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Layout,
   List,
@@ -11,163 +11,146 @@ import {
   Space,
   Tag,
   message,
+  Spin,
+  Divider,
 } from "antd";
-import {
-  ReloadOutlined,
-  TagsOutlined,
-  DeleteOutlined,
-} from "@ant-design/icons";
+import { ReloadOutlined, TagsOutlined } from "@ant-design/icons";
 
 const { Sider, Content } = Layout;
 const { Text } = Typography;
 
+const API_BASE = "http://localhost:8000";
+
+// -----------------------------
+// Generic API helper
+// -----------------------------
+async function apiPost(path, body = {}) {
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    throw new Error("API Error");
+  }
+
+  return res.json();
+}
+
 export default function MLTrain() {
-  // -------------------------------
-  // Dummy Data
-  // -------------------------------
-  const [groups] = useState([
-    {
-      group_id: "G1",
-      image_count: 5,
-      label: "Bolt",
-      images: [
-        "https://picsum.photos/200?1",
-        "https://picsum.photos/200?2",
-        "https://picsum.photos/200?3",
-        "https://picsum.photos/200?4",
-        "https://picsum.photos/200?5",
-      ],
-    },
-    {
-      group_id: "G2",
-      image_count: 4,
-      label: null,
-      images: [
-        "https://picsum.photos/200?6",
-        "https://picsum.photos/200?7",
-        "https://picsum.photos/200?8",
-        "https://picsum.photos/200?9",
-      ],
-    },
-    {
-      group_id: "G3",
-      image_count: 3,
-      label: "Nut",
-      images: [
-        "https://picsum.photos/200?10",
-        "https://picsum.photos/200?11",
-        "https://picsum.photos/200?12",
-      ],
-    },
-  ]);
+  const [groups, setGroups] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  const [selectedGroups, setSelectedGroups] = useState([]);
   const [labelModal, setLabelModal] = useState(false);
-  const [labelValue, setLabelValue] = useState("");
   const [activeGroup, setActiveGroup] = useState(null);
+  const [labelValue, setLabelValue] = useState("");
 
-  // -------------------------------
-  // Select Group (Stack)
-  // -------------------------------
-  const handleSelectGroup = (group) => {
-    const exists = selectedGroups.find(
-      (g) => g.group_id === group.group_id
-    );
-    if (!exists) {
-      setSelectedGroups([...selectedGroups, group]);
+  // ---------------------------------
+  // Fetch groups for training
+  // ---------------------------------
+  const fetchGroups = async () => {
+    setLoading(true);
+    try {
+      const data = await apiPost("/ml/get-groups");
+
+      if (data.success) {
+        setGroups(data.groups);
+      }
+    } catch (err) {
+      message.error("Failed to load groups");
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchGroups();
+  }, []);
+
+  // ---------------------------------
+  // Assign Label
+  // ---------------------------------
+  const handleAssignLabel = async () => {
+    if (!labelValue || !activeGroup) return;
+
+    try {
+      await apiPost("/ml/assign-label", {
+        group_id: activeGroup.group_id,
+        label: labelValue,
+      });
+
+      message.success("Label assigned successfully");
+
+      setLabelModal(false);
+      setLabelValue("");
+      fetchGroups(); // refresh list
+    } catch (err) {
+      message.error("Failed to assign label");
     }
   };
 
-  // -------------------------------
-  // Remove Group
-  // -------------------------------
-  const handleRemoveGroup = (groupId) => {
-    setSelectedGroups(
-      selectedGroups.filter((g) => g.group_id !== groupId)
-    );
-    message.success("Group removed (UI only)");
-  };
-
-  // -------------------------------
-  // Assign / Rename Label
-  // -------------------------------
-  const handleAssignLabel = () => {
-    if (!labelValue || !activeGroup) return;
-
-    const updated = selectedGroups.map((g) =>
-      g.group_id === activeGroup.group_id
-        ? { ...g, label: labelValue }
-        : g
-    );
-
-    setSelectedGroups(updated);
-    setLabelModal(false);
-    setLabelValue("");
-  };
-
-  // -------------------------------
-  // Global Rebuild
-  // -------------------------------
-  const handleRebuild = () => {
+  // ---------------------------------
+  // Rebuild Model
+  // ---------------------------------
+  const handleRebuild = async () => {
     message.loading({ content: "Rebuilding model...", key: "rebuild" });
 
-    setTimeout(() => {
+    try {
+      const data = await apiPost("/ml/rebuild");
+
       message.success({
-        content: "Model Rebuilt! (UI Only)",
+        content: `Model rebuilt (${data.samples} samples)`,
         key: "rebuild",
       });
-    }, 1500);
+    } catch (err) {
+      message.error({
+        content: "Rebuild failed",
+        key: "rebuild",
+      });
+    }
   };
 
   return (
     <Layout style={{ height: "100vh", background: "#f5f5f5" }}>
-      {/* ---------------- LEFT SIDEBAR ---------------- */}
-      <Sider width={320} style={{ background: "#fff", padding: 20 }}>
-        <Space direction="vertical" style={{ width: "100%" }} size="middle">
-          <h3 style={{ fontWeight: 600 }}>Detected Groups</h3>
+      {/* LEFT SIDEBAR */}
+      <Sider width={300} style={{ background: "#fff", padding: 20 }}>
+        <Space direction="vertical" style={{ width: "100%" }}>
+          <h3>Unlabeled Groups</h3>
 
-          <Button icon={<ReloadOutlined />} block>
+          <Button icon={<ReloadOutlined />} onClick={fetchGroups} block>
             Refresh
           </Button>
 
-          <List
-            dataSource={groups}
-            renderItem={(item) => (
-              <Card
-                size="small"
-                hoverable
-                onClick={() => handleSelectGroup(item)}
-                style={{ marginBottom: 10 }}
-              >
-                <Space direction="vertical">
-                  <Text strong style={{ fontSize: 16 }}>
-                    {item.group_id}
-                  </Text>
-
-                  <Text type="secondary">
-                    {item.image_count} images
-                  </Text>
-
-                  {item.label && (
-                    <Tag color="green">{item.label}</Tag>
-                  )}
-                </Space>
-              </Card>
-            )}
-          />
+          {loading ? (
+            <Spin />
+          ) : (
+            <List
+              dataSource={groups}
+              renderItem={(group) => (
+                <Card
+                  size="small"
+                  hoverable
+                  style={{ marginBottom: 10 }}
+                  onClick={() => {
+                    setActiveGroup(group);
+                    setLabelModal(true);
+                  }}
+                >
+                  <Space direction="vertical">
+                    <Text strong>{group.group_id}</Text>
+                    <Tag color="red">Unknown</Tag>
+                    <Text type="secondary">{group.image_count} images</Text>
+                  </Space>
+                </Card>
+              )}
+            />
+          )}
         </Space>
       </Sider>
 
-      {/* ---------------- RIGHT PANEL ---------------- */}
-      <Content style={{ padding: 30, overflowY: "auto" }}>
-        {/* GLOBAL REBUILD */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "flex-end",
-            marginBottom: 20,
-          }}
-        >
+      {/* RIGHT PANEL */}
+      <Content style={{ padding: 30 }}>
+        <div style={{ textAlign: "right", marginBottom: 20 }}>
           <Button
             icon={<ReloadOutlined />}
             type="primary"
@@ -177,94 +160,52 @@ export default function MLTrain() {
           </Button>
         </div>
 
-        {selectedGroups.length === 0 && (
-          <Card>
-            <h4>Select a group to review</h4>
+        {!activeGroup && <Card>Select a group to label</Card>}
+
+        {activeGroup && (
+          <Card
+            title={
+              <Space>
+                <Text strong>{activeGroup.group_id}</Text>
+                <Tag color="red">Unknown</Tag>
+              </Space>
+            }
+          >
+            <Divider />
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))",
+                gap: 12,
+              }}
+            >
+              {activeGroup.images?.map((img, i) => (
+                <Image
+                  key={i}
+                  src={`${API_BASE}${img}`}
+                  style={{
+                    width: "100%",
+                    height: 120,
+                    objectFit: "cover",
+                    borderRadius: 6,
+                  }}
+                />
+              ))}
+            </div>
           </Card>
         )}
-
-        <Space direction="vertical" style={{ width: "100%" }} size="large">
-          {selectedGroups.map((group) => (
-            <Card
-              key={group.group_id}
-              title={
-                <Space>
-                  <Text strong style={{ fontSize: 18 }}>
-                    {group.group_id}
-                  </Text>
-
-                  {group.label && (
-                    <Tag color="green">{group.label}</Tag>
-                  )}
-                </Space>
-              }
-              extra={
-                <Space>
-                  <Button
-                    icon={<TagsOutlined />}
-                    onClick={() => {
-                      setActiveGroup(group);
-                      setLabelValue(group.label || "");
-                      setLabelModal(true);
-                    }}
-                  >
-                    {group.label
-                      ? "Rename Label"
-                      : "Assign Label"}
-                  </Button>
-
-                  <Button
-                    danger
-                    icon={<DeleteOutlined />}
-                    onClick={() =>
-                      handleRemoveGroup(group.group_id)
-                    }
-                  >
-                    Remove
-                  </Button>
-                </Space>
-              }
-            >
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns:
-                    "repeat(auto-fill, minmax(120px, 1fr))",
-                  gap: 16,
-                }}
-              >
-                {group.images.map((img, i) => (
-                  <Image
-                    key={i}
-                    src={img}
-                    style={{
-                      width: "100%",
-                      height: 120,
-                      objectFit: "cover",
-                      borderRadius: 6,
-                    }}
-                  />
-                ))}
-              </div>
-            </Card>
-          ))}
-        </Space>
       </Content>
 
-      {/* ---------------- LABEL MODAL ---------------- */}
+      {/* LABEL MODAL */}
       <Modal
-        title={
-          activeGroup?.label
-            ? "Rename Label"
-            : "Assign Label"
-        }
+        title="Assign Label"
         open={labelModal}
         onOk={handleAssignLabel}
         onCancel={() => setLabelModal(false)}
-        okText="Save"
       >
         <Input
-          placeholder="Enter label name"
+          placeholder="Enter object name (e.g. M8_Bolt)"
           value={labelValue}
           onChange={(e) => setLabelValue(e.target.value)}
         />
