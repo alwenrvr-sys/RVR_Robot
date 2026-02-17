@@ -105,6 +105,53 @@ def get_joints():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+#-----------------PRESETS---------------
+@router.get("/presets")
+def get_presets():
+    return robot.get_presets()
+
+@router.post("/presets")
+def add_preset(name: str, pose: list):
+    try:
+        result = robot.add_preset(name, pose)
+        return {"status": "ok", "preset": {name: result}}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.put("/presets/{name}")
+def update_preset(name: str, pose: list):
+    try:
+        result = robot.update_preset(name, pose)
+        return {"status": "ok", "preset": {name: result}}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.delete("/presets/{name}")
+def delete_preset(name: str):
+    try:
+        robot.delete_preset(name)
+        return {"status": "ok", "deleted": name}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/presets/{name}/move")
+def move_to_preset(name: str, z_lift: float = 0.0, simulate: bool = True):
+    try:
+        result = robot.move_to_preset(
+            name=name,
+            z_lift=z_lift,
+            simulate=simulate
+        )
+        return {
+            "status": "ok",
+            "motion": "MoveL",
+            "mode": "SIMULATED" if simulate else "DIRECT",
+            "data": result
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 #--------------SPEED------------
 @router.get("/tcp-speed")
 def get_tcp_speed():

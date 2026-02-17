@@ -978,3 +978,56 @@ body,
 .priority-scroll::-webkit-scrollbar {
   display: none; /* Chrome, Safari */
 }
+
+.preset-scroll-container {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 6px 0;
+  scroll-behavior: smooth;
+
+  /* Hide scrollbar (Firefox) */
+  scrollbar-width: none;
+
+  /* Hide scrollbar (IE/Edge old) */
+  -ms-overflow-style: none;
+}
+
+/* Hide scrollbar (Chrome, Safari) */
+.preset-scroll-container::-webkit-scrollbar {
+  display: none;
+}
+/* ================= PRESET BUTTON STYLE ================= */
+
+.preset-btn {
+  flex: 0 0 auto;
+  min-width: 110px;
+  height: 34px;
+
+  padding: 0 14px;
+  border-radius: 6px;
+
+  font-size: 12px;
+  font-weight: 500;
+
+  background: #ffffff;
+  color: #222;
+
+  border: 1px solid #d9d9d9;
+  cursor: pointer;
+
+  transition: all 0.18s ease;
+}
+
+/* Hover → only blue change */
+.preset-btn:hover {
+  background: #1677ff;
+  color: #ffffff;
+  border-color: #1677ff;
+}
+
+/* Optional: active press effect */
+.preset-btn:active {
+  transform: scale(0.97);
+}

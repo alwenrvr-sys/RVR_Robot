@@ -14,6 +14,7 @@ import {
   resetAnalysis,
 } from "../appRedux/actions/Application";
 import LeftFanMenu from "./LeftFanMenu";
+import PriorityStack from "./PriorityStack";
 
 export default function LeftSidebarPick({ onModeChange }) {
   const dispatch = useDispatch();
@@ -164,7 +165,7 @@ export default function LeftSidebarPick({ onModeChange }) {
       >
         STOP
       </Button>
-      <Divider />
+      <Divider style={{ margin: "10px 0" }} />
 
       {/* ================= IMAGE PROCESSING ================= */}
       <h4 className="section-title">Image Processing</h4>
@@ -230,8 +231,6 @@ export default function LeftSidebarPick({ onModeChange }) {
         />
       </Field>
 
-      <Divider />
-
       {/* ================= CALIBRATION ================= */}
       <h4 className="section-title">Calibration</h4>
 
@@ -242,8 +241,9 @@ export default function LeftSidebarPick({ onModeChange }) {
       <Field label="Scale Y (px/mm)">
         <InputNumber size="small" step={0.1} precision={3} value={scaleY} />
       </Field>
-
-      <Divider />
+      <Divider style={{ margin: "10px 0" }} />
+      <PriorityStack />
+      <Divider style={{ margin: "10px 0" }} />
     </aside>
   );
 }

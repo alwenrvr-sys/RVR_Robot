@@ -14,6 +14,8 @@ import {
   pickUnpick,
 } from "../appRedux/actions/Robot";
 import { showNotification } from "../appRedux/actions/Notify";
+import PresetMenu from "./PresetMenu";
+
 import { useEffect, useState } from "react";
 
 export default function RightSidebar() {
@@ -132,7 +134,6 @@ export default function RightSidebar() {
       <Divider style={{ margin: "10px 0" }} />
 
       {/* ================= OPTIONS ================= */}
-      <h4 className="section-title">Options</h4>
 
       <div className="robot-field toggle-row">
         <label>Simulate before move</label>
@@ -203,8 +204,17 @@ export default function RightSidebar() {
 
       <Divider style={{ margin: "10px 0" }} />
 
+      <PresetMenu
+        simulate={simulate}
+        zLift={zLift}
+        connected={connected}
+        disabled={!connected || isDisabledState}
+      />
+
+      <Divider style={{ margin: "10px 0" }} />
+
       {/* ================= CONTROL ================= */}
-      <h4 className="section-title">Control</h4>
+      <h4 className="section-title">Controls</h4>
 
       <div className="btn-row">
         <Button

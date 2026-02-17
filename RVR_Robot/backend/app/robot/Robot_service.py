@@ -12,7 +12,12 @@ class RobotService:
     def __init__(self):
         self.robot = RPC(ROBOT_IP)
         self.lock = threading.Lock()
-
+        self.presets = {
+            "FOCUS": [10, 700, 450, 180, 0, 45],
+            "FOCUS_2": [700, 10, 450, 180, 0, 45],
+            "HOME_POSE"   : [260, 431, 160, -180, 0, 45],
+            "HOME_2_POSE" : [700, 10, 160, -180, 0, 45]
+        }
     def call(self, name, *args):
         with self.lock:
             return getattr(self.robot, name)(*args)
@@ -30,7 +35,54 @@ class RobotService:
     def get_joints_deg(self):
         with self.lock:
             return self.robot.GetActualJointPosDegree()
+        
+#----------GET_PRESET---------
+    def get_presets(self):
+        return self.presets
     
+#---------ADD_PRESET--------
+    def add_preset(self, name: str, pose: list):
+        if len(pose) != 6:
+            raise ValueError("Pose must have 6 values")
+        self.presets[name.upper()] = pose
+        return self.presets[name.upper()]
+
+#---------UPDATE_PRESET---------
+    def update_preset(self, name: str, pose: list):
+        name = name.upper()
+        if name not in self.presets:
+            raise ValueError("Preset not found")
+        if len(pose) != 6:
+            raise ValueError("Pose must have 6 values")
+        self.presets[name] = pose
+        return pose
+
+#------------DELETE_PRESET-----------
+    def delete_preset(self, name: str):
+        name = name.upper()
+        if name not in self.presets:
+            raise ValueError("Preset not found")
+        del self.presets[name]
+        return True
+
+#-----------MOVE_TO_PRESET-------------
+    def move_to_preset(self, name: str, z_lift: float = 0.0, simulate: bool = True):
+        name = name.upper()
+        if name not in self.presets:
+            raise ValueError("Preset not found")
+        target_pose = self.presets[name]
+        result = self.move_to_pose_l(
+            target_pose=target_pose,
+            z_lift=z_lift,
+            simulate=simulate
+        )
+        if not result.get("success"):
+            raise RuntimeError(result.get("error", "Preset move failed"))
+        return {
+            "preset": name,
+            "result": result
+        }
+
 #--------ACTIONS---------
     def set_mode(self, mode: int):
         mode = int(mode)

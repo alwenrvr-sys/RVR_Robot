@@ -1,6 +1,5 @@
-import React from "react";
 import "../App.css";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Spin, message } from "antd";
 import RightSidebar from "./RightSidebar";
