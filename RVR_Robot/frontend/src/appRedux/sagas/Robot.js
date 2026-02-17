@@ -30,6 +30,7 @@ import {
   ROBOT_SET_MOTION_PARAMS,
   ROBOT_SET_MOTION_PARAMS_SUCCESS,
   ROBOT_SET_MOTION_PARAMS_FAILURE,
+  SET_PLAN_PREVIEW,
 } from "../../constants/ActionType";
 import { showNotification } from "../actions/Notify";
 import { ROBOT_SERVICE } from "../../services/RobotServices";
@@ -212,6 +213,13 @@ function* moveLAsync(action) {
         response: response.data,
       },
     });
+    const plan = response.data?.data?.plan || null;
+    if (plan) {
+      yield put({
+        type: SET_PLAN_PREVIEW,
+        payload: plan,
+      });
+    }
 
     yield put(
       showNotification(

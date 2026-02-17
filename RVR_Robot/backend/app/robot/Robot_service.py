@@ -226,7 +226,12 @@ class RobotService:
         try:
             if len(target_pose) != 6:
                 raise ValueError("target_pose must be [x,y,z,rx,ry,rz]")
-
+            
+            plan = self.plan_move(
+                target_pose=target_pose,
+                z_lift=z_lift,
+                simulate=simulate
+            )
             # ---- Read current TCP (A) ----
             err, cur_pose = self.get_tcp()
             if err != 0:
@@ -272,6 +277,7 @@ class RobotService:
                     "B": joints_b,
                 },
                 "sim_codes": sim_codes,
+                "plan":plan,
             }
 
         except Exception as e:
@@ -280,6 +286,67 @@ class RobotService:
                 "error": str(e),
             }
             
+    def plan_move(self, target_pose, z_lift=0.0, simulate=True):
+
+        if len(target_pose) != 6:
+            raise ValueError("target_pose must be [x,y,z,rx,ry,rz]")
+
+        # ---- Current TCP (A) ----
+        err, cur_pose = self.get_tcp()
+        if err != 0:
+            raise RuntimeError("Failed to read current TCP")
+
+        # ---- Waypoint C ----
+        via_pose = list(target_pose)
+        via_pose[2] += float(z_lift)
+
+        # ---- IK ----
+        ret_c, joints_c = self.ik(via_pose)
+        ret_b, joints_b = self.ik(target_pose)
+
+        if ret_c != 0 or ret_b != 0:
+            raise RuntimeError("IK failed (pose unreachable)")
+
+        # ---- Distance ----
+        def dist_mm(p1, p2):
+            return ((p1[0]-p2[0])**2 +
+                    (p1[1]-p2[1])**2 +
+                    (p1[2]-p2[2])**2) ** 0.5
+
+        dist_ac = dist_mm(cur_pose, via_pose)
+        dist_cb = dist_mm(via_pose, target_pose)
+        total_dist = dist_ac + dist_cb
+
+        sim_codes = None
+
+        # ---- Simulation only ----
+        if simulate and hasattr(self.robot, "SimMoveL"):
+            e1 = self._errcode(self.sim_move_l(cur_pose, 1))
+            e2 = self._errcode(self.sim_move_l(via_pose, 2))
+            e3 = self._errcode(self.sim_move_l(target_pose, 3))
+
+            sim_codes = {"A": e1, "C": e2, "B": e3}
+
+            if e1 != 0 or e2 != 0 or e3 != 0:
+                raise RuntimeError(f"SimMoveL failed: {sim_codes}")
+
+        return {
+            "A_tcp": cur_pose,
+            "C_tcp": via_pose,
+            "B_tcp": target_pose,
+            "distance_mm": {
+                "A_to_C": round(dist_ac, 2),
+                "C_to_B": round(dist_cb, 2),
+                "total": round(total_dist, 2),
+            },
+            "ik_joints": {
+                "C": joints_c,
+                "B": joints_b,
+            },
+            "sim_codes": sim_codes,
+            "z_lift": z_lift,
+        }
+        
     def get_joint_soft_limits_deg(self):
         """
         Returns joint soft limits in degrees:

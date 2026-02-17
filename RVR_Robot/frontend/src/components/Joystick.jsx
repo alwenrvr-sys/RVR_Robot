@@ -15,6 +15,7 @@ import { setJoystickMode } from "../appRedux/actions/Joystick";
 export default function Joystick() {
   const dispatch = useDispatch();
   const mode = useSelector((state) => state.joystick.mode);
+  const plan = useSelector((state) => state.robot.plan);
 
   const { loading, autosetupLoading } = useSelector((state) => state.camera);
 
@@ -67,7 +68,45 @@ export default function Joystick() {
         </div>
 
         <div className="center-lower">
-          <div className="panel">Status / Controls</div>
+          <div className="panel">
+            {plan ? (
+              <div style={{ fontFamily: "monospace", fontSize: 13 }}>
+                <h4>Planned Path (A → C → B)</h4>
+
+                <p>
+                  <b>A:</b> {plan.A_tcp.map((v) => v.toFixed(2)).join(", ")}
+                </p>
+                <p>
+                  <b>C:</b> {plan.C_tcp.map((v) => v.toFixed(2)).join(", ")}
+                </p>
+                <p>
+                  <b>B:</b> {plan.B_tcp.map((v) => v.toFixed(2)).join(", ")}
+                </p>
+
+                <hr />
+
+                <p>A→C: {plan.distance_mm.A_to_C} mm</p>
+                <p>C→B: {plan.distance_mm.C_to_B} mm</p>
+                <p>
+                  <b>Total: {plan.distance_mm.total} mm</b>
+                </p>
+
+                <hr />
+
+                <p>
+                  <b>IK C:</b>
+                </p>
+                <p>{plan.ik_joints.C.map((v) => v.toFixed(2)).join(", ")}</p>
+
+                <p>
+                  <b>IK B:</b>
+                </p>
+                <p>{plan.ik_joints.B.map((v) => v.toFixed(2)).join(", ")}</p>
+              </div>
+            ) : (
+              "Plan Preview"
+            )}
+          </div>
         </div>
       </main>
 

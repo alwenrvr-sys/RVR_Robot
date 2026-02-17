@@ -154,6 +154,19 @@ body,
   background: #fafafa;
 }
 
+.center-lower .panel {
+  height: 240px;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+}
+
+.center-lower .panel::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
+}
+
 /* =========================================================
    SECTIONS & TITLES
    ========================================================= */
@@ -963,5 +976,5 @@ body,
 }
 
 .priority-scroll::-webkit-scrollbar {
-  display: none;   /* Chrome, Safari */
+  display: none; /* Chrome, Safari */
 }

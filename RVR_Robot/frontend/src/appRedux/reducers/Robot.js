@@ -23,6 +23,7 @@ import {
   ROBOT_SET_MOTION_PARAMS,
   ROBOT_SET_MOTION_PARAMS_SUCCESS,
   ROBOT_SET_MOTION_PARAMS_FAILURE,
+  SET_PLAN_PREVIEW,
 } from "../../constants/ActionType";
 
 const initialState = {
@@ -38,6 +39,7 @@ const initialState = {
     acc: 50,
     ovl: 100,
   },
+  plan: null,
   loadingMotionParams: false,
   motionParamsError: null,
   error: null,
@@ -182,6 +184,12 @@ const Robot = (state = initialState, action) => {
         error: action.payload,
       };
 
+    case SET_PLAN_PREVIEW:
+      return {
+        ...state,
+        plan: action.payload,
+      };
+      
     default:
       return state;
   }

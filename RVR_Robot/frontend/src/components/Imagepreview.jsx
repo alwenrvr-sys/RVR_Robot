@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { useSelector } from "react-redux";
 import ImageOverlay from "./ImageOverlay";
 import { FileImageOutlined } from "@ant-design/icons";
+
 export default function Imagepreview() {
   const imgRef = useRef(null);
   const { running, image_base64 } = useSelector((state) => state.app);
@@ -14,14 +15,14 @@ export default function Imagepreview() {
       <div
         style={{
           display: "flex",
-          flexDirection: "column", 
+          flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
           height: "100%",
+          width: "100%",
         }}
       >
         <FileImageOutlined style={{ fontSize: 40 }} />
-
         <h4
           style={{
             marginTop: 8,
@@ -36,12 +37,30 @@ export default function Imagepreview() {
     );
 
   return (
-    <div className="joystick-preview" style={{ position: "relative" }}>
+    <div
+      className="joystick-preview"
+      style={{
+        position: "relative",
+        width: "100%",
+        height: "100%",
+        overflow: "hidden",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
       <img
         ref={imgRef}
         src={`data:image/jpeg;base64,${imageBase64}`}
         alt="Preview"
-        style={{ width: "100%", height: "100%", objectFit: "contain" }}
+        style={{
+          maxWidth: "100%", 
+          maxHeight: "100%",
+          width: "auto",
+          height: "auto",
+          objectFit: "contain",
+          display: "block",
+        }}
       />
       <ImageOverlay imgRef={imgRef} />
     </div>
