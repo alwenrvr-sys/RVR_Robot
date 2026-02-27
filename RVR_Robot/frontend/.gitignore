@@ -23,7 +23,7 @@ yarn-debug.log*
 yarn-error.log*
 
 # Ignore storage folder
-/RVR_STORAGE/
+/RVR_Robot/RVR_STORAGE/
 
 # Python
 __pycache__/

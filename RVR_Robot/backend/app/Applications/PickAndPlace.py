@@ -17,7 +17,7 @@ from app.robot.Helpers import (
 # --------------------------------------------------
 
 robot = get_robot()
-camera = SickCamera("192.168.58.67", 2114)
+camera = SickCamera("192.168.58.231", 2114)
 
 # --------------------------------------------------
 # POSES

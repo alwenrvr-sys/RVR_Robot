@@ -12,7 +12,7 @@ SUPPORTED_EXTS = (".png", ".jpg", ".jpeg", ".bmp", ".tif", ".tiff")
 # Singleton camera instance (one TCP connection)
 _camera: Optional[SickCamera] = None
 
-CAMERA_IP = "192.168.58.67"
+CAMERA_IP = "192.168.58.231"
 CAMERA_PORT = 2114
 
 

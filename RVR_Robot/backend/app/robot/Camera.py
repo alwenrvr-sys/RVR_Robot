@@ -4,7 +4,7 @@ import time
 STX = b"\x02"
 ETX = b"\x03"
 
-CAMERA_IP = "192.168.58.67"
+CAMERA_IP = "192.168.58.231"
 CAMERA_PORT = 2114   # SOPAS command port
 
 
